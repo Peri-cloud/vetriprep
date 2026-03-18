@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VETRIPREP">
+<meta name="theme-color" content="#09080a">
+<title>VETRIPREP — Government Pharmacist 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09080a;
+  --bg2:#100e12;
+  --bg3:#181520;
+  --bg4:#201c2a;
+  --card:#120f17;
+  --border:#26223a;
+  --border2:#362f50;
+  --text:#f2eff8;
+  --text2:#a8a0c0;
+  --text3:#60587a;
+  --accent:#c49a6c;
+  --accent2:#9e7548;
+  --accent-l:#271c0e;
+  --gold:#e0b87a;
+  --gold2:#c49a6c;
+  --green:#3ecb8a;
+  --green-l:#0a2818;
+  --red:#e06070;
+  --red-l:#280e14;
+  --amber:#d4980a;
+  --amber-l:#2a1d04;
+  --blue:#7ab0e0;
+  --blue-l:#0e1e30;
+  --pink:#d490aa;
+  --r:14px;
+  --r2:9px;
+  --font:'Space Grotesk',sans-serif;
+  --head:'Bricolage Grotesque',sans-serif;
+  --serif:'Instrument Serif',serif;
+  --mono:'JetBrains Mono',monospace;
+  --shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:2px;opacity:0.5}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:230px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;backdrop-filter:blur(10px)}
+.logo{padding:18px 18px 16px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,rgba(196,154,108,0.07),rgba(196,154,108,0.02),transparent)}
+.logo h1{font-family:var(--head);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+.logo p{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono);letter-spacing:0.3px}
+.nav{padding:16px 0;flex:1;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.2s;border-left:2px solid transparent;font-weight:500;font-family:var(--font);border-radius:0 8px 8px 0;margin:1px 8px 1px 0}
+.nav-item:hover{color:var(--text);background:rgba(196,154,108,0.06)}
+.nav-item.active{color:var(--gold);background:linear-gradient(90deg,rgba(196,154,108,0.15),transparent);border-left-color:var(--gold);font-weight:600}
+.nav-item .icon{font-size:15px;width:18px;text-align:center}
+.nav-group{padding:14px 18px 4px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:2px;font-family:var(--mono);text-transform:uppercase}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid var(--border);background:linear-gradient(0deg,rgba(196,154,108,0.04),transparent)}
+.today-pill{background:linear-gradient(135deg,rgba(196,154,108,0.12),rgba(158,117,72,0.08));border:1px solid rgba(196,154,108,0.3);border-radius:20px;padding:7px 14px;font-size:11px;color:var(--gold);font-family:var(--mono);text-align:center;letter-spacing:0.5px}
+
+/* MAIN */
+.main{margin-left:230px;flex:1;min-height:100vh;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(196,154,108,0.04),transparent)}
+
+/* PAGES */
+.page{display:none;padding:36px 40px;animation:fadeIn 0.25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.page-header h2{font-family:var(--head);font-size:32px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1}
+.page-header p{font-size:14px;color:var(--text3);margin-top:6px;font-weight:400}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;margin-bottom:16px;transition:border-color 0.2s}
+.card-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;font-family:var(--mono)}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+
+/* STAT CARDS */
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;transition:all 0.2s}
+.stat-val{font-family:var(--head);font-size:36px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-2px}
+.stat-val span{font-size:16px;color:var(--text3)}
+.stat-label{font-size:9px;color:var(--text3);margin-top:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.5px}
+.stat-sub{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* FORM */
+.form-group{margin-bottom:14px}
+.form-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px;display:block;font-family:var(--mono)}
+.form-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:11px 14px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:all 0.2s}
+.form-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,154,108,0.1)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input option{background:var(--bg3)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r2);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;font-family:var(--font);letter-spacing:0.2px}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--accent2));color:#1a0e05;font-weight:700}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 16px rgba(196,154,108,0.3)}
+.btn-success{background:var(--green);color:white}
+.btn-success:hover{filter:brightness(1.1)}
+.btn-danger{background:var(--red);color:white}
+.btn-danger:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-sm{padding:6px 14px;font-size:12px}
+
+/* BADGES */
+.badge{display:inline-block;font-size:9px;padding:3px 9px;border-radius:8px;font-weight:600;font-family:var(--mono);letter-spacing:0.3px}
+.badge-purple{background:var(--accent-l);color:var(--accent);border:1px solid var(--accent2)}
+.badge-green{background:var(--green-l);color:var(--green)}
+.badge-red{background:var(--red-l);color:var(--red)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}
+.badge-blue{background:var(--blue-l);color:var(--blue)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg2);padding:11px 16px;text-align:left;font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono);border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.td-action{display:flex;gap:6px}
+
+/* CHECKLIST */
+.check-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.15s}
+.check-item:last-child{border-bottom:none}
+.check-item:hover{padding-left:4px}
+.check-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);flex-shrink:0;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.check-box.done{background:var(--green);border-color:var(--green)}
+.check-box.done::after{content:'✓';font-size:11px;color:white;font-weight:700}
+.check-label{font-size:13px;color:var(--text)}
+.check-label.done{color:var(--text3);text-decoration:line-through}
+
+/* BLOCKS */
+.block-item{display:flex;align-items:center;gap:14px;padding:11px 16px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--border);margin-bottom:6px;transition:all 0.2s}
+.block-item:hover{border-color:var(--border2)}
+.block-item.break-item{opacity:0.5;background:var(--bg2)}
+.block-num{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--gold);min-width:28px;letter-spacing:0.5px}
+.block-time{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:120px}
+.block-subj{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.block-mcq{font-size:11px;color:var(--text3);font-family:var(--mono);min-width:70px;text-align:right}
+.block-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);cursor:pointer;flex-shrink:0;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.block-check.done{background:var(--green);border-color:var(--green)}
+.block-check.done::after{content:'✓';font-size:10px;color:white;font-weight:700}
+
+/* PROGRESS BAR */
+.progress-wrap{background:var(--bg3);border-radius:3px;height:5px;overflow:hidden;margin-top:10px}
+.progress-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--accent2));transition:width 0.6s ease}
+.progress-bar.green{background:var(--green)}
+.progress-bar.amber{background:var(--amber)}
+
+/* PAIN METER */
+.pain-scale{display:flex;gap:6px;margin-top:8px}
+.pain-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)}
+.pain-dot:hover{transform:scale(1.1)}
+.pain-dot.active{color:white;border-color:transparent}
+
+/* SUBJECT TAGS */
+.subj-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin:2px;cursor:pointer;transition:all 0.15s;border:1px solid var(--border)}
+.subj-tag.sel{background:var(--accent-l);color:var(--accent);border-color:var(--accent2)}
+.subj-tag:not(.sel){color:var(--text3)}
+.subj-tag:hover:not(.sel){color:var(--text);border-color:var(--border2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:white;padding:12px 20px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:all 0.3s;box-shadow:var(--shadow)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:var(--red)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:32px;width:500px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.modal-title{font-family:var(--head);font-size:20px;font-weight:800;margin-bottom:22px;color:var(--text);letter-spacing:-0.5px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* TAG ROW */
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+
+/* SUBJECT PROGRESS */
+.subj-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.subj-row:last-child{border-bottom:none}
+.subj-name{font-size:13px;font-weight:500;flex:1;color:var(--text)}
+.subj-cat{font-size:10px;padding:2px 7px;border-radius:8px;font-family:var(--mono);font-weight:600}
+.subj-prog{width:80px;text-align:right;font-size:12px;color:var(--text3);font-family:var(--mono)}
+
+/* EXAM CARDS */
+.exam-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:10px;transition:all 0.2s}
+.exam-card:hover{border-color:rgba(196,154,108,0.3);background:var(--bg2)}
+.exam-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.exam-info{flex:1}
+.exam-name{font-size:14px;font-weight:600;color:var(--text)}
+.exam-body{font-size:12px;color:var(--text3);margin-top:2px}
+.exam-status{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;font-family:var(--mono)}
+
+/* RESPONSIVE */
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--bg2);border-top:1px solid var(--border);z-index:200;flex-direction:row;align-items:center;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom)}
+.mob-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;cursor:pointer;border-radius:10px;transition:all 0.15s;flex:1;min-width:0}
+.mob-btn:hover,.mob-btn.active{background:var(--accent-l)}
+.mob-btn .icon{font-size:18px;line-height:1}
+.mob-btn .label{font-size:9px;font-family:var(--mono);color:var(--text3);letter-spacing:0.5px;white-space:nowrap}
+.mob-btn.active .label{color:var(--accent)}
+.mob-more-menu{display:none;position:fixed;bottom:65px;left:8px;right:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px;z-index:300;box-shadow:0 -8px 32px rgba(0,0,0,0.5)}
+.mob-more-menu.open{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.mob-more-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;cursor:pointer;border-radius:8px;background:var(--bg3);border:1px solid var(--border)}
+.mob-more-item .icon{font-size:20px}
+.mob-more-item .label{font-size:10px;color:var(--text2);font-family:var(--mono);text-align:center}
+.sync-bar{display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold));z-index:500;animation:syncpulse 1.5s ease-in-out infinite}
+@keyframes syncpulse{0%,100%{opacity:0.4}50%{opacity:1}}
+.sync-badge{position:fixed;top:12px;right:12px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-family:var(--mono);color:var(--text3);z-index:400;display:flex;align-items:center;gap:6px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.login-overlay{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:40px 36px;width:360px;max-width:90vw;text-align:center}
+.login-logo{margin-bottom:24px}
+.login-title{font-family:var(--head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:8px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.6}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;background:white;color:#1a1a1a;border:none;border-radius:var(--r2);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font);margin-bottom:12px}
+.google-btn:hover{background:#f0f0f0;transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,255,255,0.15)}
+.skip-btn{font-size:12px;color:var(--text3);cursor:pointer;font-family:var(--mono);background:none;border:none;padding:8px;text-decoration:underline;text-underline-offset:3px}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .mobile-nav{display:flex}
+  .mob-more-menu{display:none}
+  .mob-more-menu.open{display:grid}
+  .main{margin-left:0;padding-bottom:70px}
+  .page{padding:16px 14px 20px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .page-header{padding-bottom:14px;margin-bottom:20px}
+  .page-header h2{font-size:24px}
+  .stat-val{font-size:28px}
+  .sync-badge{display:flex}
+}
+@media(min-width:769px){
+  .sync-badge{display:none}
+  .mob-more-menu{display:none !important}
+}
+
+/* POMODORO */
+.pomo-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.pomo-mode-row{display:flex;gap:6px;margin-bottom:18px}
+.pomo-mode-btn{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text3);font-family:var(--mono);transition:all 0.15s}
+.pomo-mode-btn.active{background:var(--accent-l);color:var(--accent);border-color:var(--accent)}
+.pomo-ring-wrap{position:relative;width:160px;height:160px;margin-bottom:16px}
+.pomo-svg{transform:rotate(-90deg)}
+.pomo-ring-bg{fill:none;stroke:var(--bg3);stroke-width:8}
+.pomo-ring-prog{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.3s}
+.pomo-time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pomo-time-val{font-family:var(--head);font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1}
+.pomo-time-label{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+.pomo-controls{display:flex;gap:10px;margin-bottom:12px}
+.pomo-btn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.15s}
+.pomo-btn-start{background:var(--accent);color:white}
+.pomo-btn-start:hover{background:var(--accent2);transform:scale(1.05)}
+.pomo-btn-reset{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.pomo-btn-reset:hover{color:var(--text)}
+.pomo-sessions{display:flex;gap:6px;margin-top:4px}
+.pomo-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.3s}
+.pomo-dot.done{background:var(--accent)}
+.pomo-subject{font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="56" height="64" viewBox="0 0 42 54" fill="none">
+        <defs>
+          <linearGradient id="ls" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e0b87a"/><stop offset="100%" stop-color="#8a5e30"/></linearGradient>
+          <linearGradient id="lb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#251e30"/><stop offset="100%" stop-color="#1a1420"/></linearGradient>
+        </defs>
+        <path d="M21 2 L39 9 L39 30 Q39 46 21 52 Q3 46 3 30 L3 9 Z" fill="url(#lb)"/>
+        <path d="M21 2 L39 9 L39 30 Q39 46 21 52 Q3 46 3 30 L3 9 Z" fill="none" stroke="#c49a6c" stroke-width="1.5" opacity="0.8"/>
+        <path d="M12 16 L21 32 L30 16" fill="none" stroke="url(#ls)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="21" cy="2" r="2.5" fill="#c49a6c"/>
+      </svg>
+    </div>
+    <div class="login-title">VETRIPREP</div>
+    <div class="login-sub">Sign in to sync your study data<br>across mobile and desktop</div>
+    <button class="google-btn" onclick="signInGoogle()">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/></svg>
+      Continue with Google
+    </button>
+    <button class="skip-btn" onclick="skipLogin()">Use offline (no sync)</button>
+  </div>
+</div>
+
+<!-- SYNC BADGE (mobile) -->
+<div class="sync-badge" id="sync-badge">
+  <div class="sync-dot" id="sync-dot" style="background:var(--text3)"></div>
+  <span id="sync-status">Offline</span>
+</div>
+<!-- SYNC BAR -->
+<div class="sync-bar" id="sync-bar" style="display:none"></div>
+
+<div class="app">
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <div class="mob-btn active" id="mob-dashboard" onclick="mobNav('dashboard',this)"><span class="icon">🏠</span><span class="label">Home</span></div>
+  <div class="mob-btn" id="mob-log" onclick="mobNav('log',this)"><span class="icon">📅</span><span class="label">Log</span></div>
+  <div class="mob-btn" id="mob-errors" onclick="mobNav('errors',this)"><span class="icon">❌</span><span class="label">Errors</span></div>
+  <div class="mob-btn" id="mob-timer" onclick="mobNav('timer',this)"><span class="icon">⏱</span><span class="label">Timer</span></div>
+  <div class="mob-btn" id="mob-more" onclick="toggleMoreMenu()"><span class="icon">☰</span><span class="label">More</span></div>
+</nav>
+
+<!-- MOBILE MORE MENU -->
+<div class="mob-more-menu" id="mob-more-menu">
+  <div class="mob-more-item" onclick="mobNav('subjects',null);toggleMoreMenu()"><span class="icon">📚</span><span class="label">Subjects</span></div>
+  <div class="mob-more-item" onclick="mobNav('weekly',null);toggleMoreMenu()"><span class="icon">📊</span><span class="label">Weekly</span></div>
+  <div class="mob-more-item" onclick="mobNav('applications',null);toggleMoreMenu()"><span class="icon">📋</span><span class="label">Apply</span></div>
+  <div class="mob-more-item" onclick="mobNav('fees',null);toggleMoreMenu()"><span class="icon">💰</span><span class="label">Fees</span></div>
+  <div class="mob-more-item" onclick="mobNav('halltix',null);toggleMoreMenu()"><span class="icon">🎫</span><span class="label">Hall Ticket</span></div>
+  <div class="mob-more-item" onclick="mobNav('results',null);toggleMoreMenu()"><span class="icon">🏆</span><span class="label">Results</span></div>
+  <div class="mob-more-item" onclick="mobNav('travel',null);toggleMoreMenu()"><span class="icon">🚌</span><span class="label">Travel</span></div>
+  <div class="mob-more-item" onclick="mobNav('bagpack',null);toggleMoreMenu()"><span class="icon">🎒</span><span class="label">Bag</span></div>
+  <div class="mob-more-item" onclick="mobNav('certificates',null);toggleMoreMenu()"><span class="icon">📜</span><span class="label">Certs</span></div>
+  <div class="mob-more-item" onclick="mobNav('goals',null);toggleMoreMenu()"><span class="icon">🎯</span><span class="label">Goals</span></div>
+  <div class="mob-more-item" onclick="mobNav('health',null);toggleMoreMenu()"><span class="icon">💊</span><span class="label">Health</span></div>
+  <div class="mob-more-item" onclick="mobNav('export',null);toggleMoreMenu()"><span class="icon">⬇</span><span class="label">Export</span></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <!-- Shield SVG Logo -->
+      <svg width="42" height="48" viewBox="0 0 42 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(196,154,108,0.3))">
+        <defs>
+          <linearGradient id="sgrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e0b87a"/>
+            <stop offset="100%" stop-color="#8a5e30"/>
+          </linearGradient>
+          <linearGradient id="sbg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#251e30"/>
+            <stop offset="100%" stop-color="#1a1420"/>
+          </linearGradient>
+        </defs>
+        <!-- Shield body -->
+        <path d="M21 2 L39 9 L39 30 Q39 46 21 52 Q3 46 3 30 L3 9 Z" fill="url(#sbg)"/>
+        <!-- Shield outer border -->
+        <path d="M21 2 L39 9 L39 30 Q39 46 21 52 Q3 46 3 30 L3 9 Z" fill="none" stroke="#c49a6c" stroke-width="1.5" opacity="0.8"/>
+        <!-- Inner shield -->
+        <path d="M21 8 L34 13 L34 29 Q34 41 21 46 Q8 41 8 29 L8 13 Z" fill="none" stroke="#c49a6c" stroke-width="0.5" opacity="0.3"/>
+        <!-- Bold V -->
+        <path d="M12 16 L21 32 L30 16" fill="none" stroke="url(#sgrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Top star dot -->
+        <circle cx="21" cy="2" r="2.5" fill="#c49a6c" opacity="0.9"/>
+        <!-- Bottom tip accent -->
+        <circle cx="21" cy="52" r="1.5" fill="#c49a6c" opacity="0.6"/>
+        <!-- Side dots -->
+        <circle cx="39" cy="9" r="1.5" fill="#c49a6c" opacity="0.4"/>
+        <circle cx="3" cy="9" r="1.5" fill="#c49a6c" opacity="0.4"/>
+      </svg>
+      <div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;color:#f2eff8;letter-spacing:-0.5px;line-height:1.1">VETRIPREP</div>
+        <div style="font-size:10px;color:#c49a6c;font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-top:3px;opacity:0.7">வெற்றி · VICTORY</div>
+      </div>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,rgba(196,154,108,0.3),transparent);margin-bottom:8px"></div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(196,154,108,0.08);color:#8070a0;font-family:'JetBrains Mono',monospace;font-weight:600;border:0.5px solid rgba(196,154,108,0.15)">MRB</span>
+      <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(196,154,108,0.08);color:#8070a0;font-family:'JetBrains Mono',monospace;font-weight:600;border:0.5px solid rgba(196,154,108,0.15)">RRB</span>
+      <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(196,154,108,0.08);color:#8070a0;font-family:'JetBrains Mono',monospace;font-weight:600;border:0.5px solid rgba(196,154,108,0.15)">TNPSC</span>
+      <span style="font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(196,154,108,0.08);color:#8070a0;font-family:'JetBrains Mono',monospace;font-weight:600;border:0.5px solid rgba(196,154,108,0.15)">NIT</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">Study</div>
+    <div class="nav-item active" onclick="window.nav('dashboard')"><span class="icon">🏠</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="window.nav('timer')"><span class="icon">⏱</span><span>Pomodoro</span></div>
+    <div class="nav-item" onclick="window.nav('log')"><span class="icon">📅</span><span>Daily Log</span></div>
+    <div class="nav-item" onclick="window.nav('errors')"><span class="icon">❌</span><span>Error Log</span></div>
+    <div class="nav-item" onclick="window.nav('subjects')"><span class="icon">📚</span><span>Subjects</span></div>
+    <div class="nav-item" onclick="window.nav('weekly')"><span class="icon">📊</span><span>Weekly</span></div>
+    <div class="nav-group">Exams</div>
+    <div class="nav-item" onclick="window.nav('applications')"><span class="icon">📋</span><span>Applications</span></div>
+    <div class="nav-item" onclick="window.nav('fees')"><span class="icon">💰</span><span>Fees</span></div>
+    <div class="nav-item" onclick="window.nav('halltix')"><span class="icon">🎫</span><span>Hall Tickets</span></div>
+    <div class="nav-item" onclick="window.nav('results')"><span class="icon">🏆</span><span>Results</span></div>
+    <div class="nav-group">Exam Day</div>
+    <div class="nav-item" onclick="window.nav('travel')"><span class="icon">🚌</span><span>Travel Planner</span></div>
+    <div class="nav-item" onclick="window.nav('bagpack')"><span class="icon">🎒</span><span>Bag Checklist</span></div>
+    <div class="nav-item" onclick="window.nav('certificates')"><span class="icon">📜</span><span>Certificates</span></div>
+    <div class="nav-group">Growth</div>
+    <div class="nav-item" onclick="window.nav('goals')"><span class="icon">🎯</span><span>Goals</span></div>
+    <div class="nav-item" onclick="window.nav('health')"><span class="icon">💊</span><span>Health Log</span></div>
+    <div class="nav-group">Export</div>
+    <div class="nav-item" onclick="window.nav('export')"><span class="icon">⬇</span><span>Download Data</span></div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="today-pill" id="today-pill"></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <h2>Dashboard</h2>
+    <p id="dash-date"></p>
+  </div>
+
+  <div class="grid-4" id="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="stat-days">0</div>
+      <div class="stat-label">Days Logged</div>
+      <div class="stat-sub">total entries</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-hrs">0<span>h</span></div>
+      <div class="stat-label">Hours This Week</div>
+      <div class="stat-sub">target: 56–70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-mcq">0</div>
+      <div class="stat-label">MCQs This Week</div>
+      <div class="stat-sub">target: 560+</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-errors">0</div>
+      <div class="stat-label">Errors Logged</div>
+      <div class="stat-sub">total mistakes</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Today's Checklist</div>
+      <div id="checklist-items"></div>
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px">
+          <span>Progress</span><span id="check-count">0/10</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar green" id="check-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Study Blocks Today</div>
+      <div id="blocks-list"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pain Day Protocol</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+      <span><span class="badge badge-green">1–4</span> <span style="color:var(--text2);margin-left:6px">Full plan</span></span>
+      <span><span class="badge badge-amber">5–6</span> <span style="color:var(--text2);margin-left:6px">Skip 2 blocks, keep MCQs</span></span>
+      <span><span class="badge badge-red">7–8</span> <span style="color:var(--text2);margin-left:6px">Morning only + revision</span></span>
+      <span><span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border)">9–10</span> <span style="color:var(--text2);margin-left:6px">Rest + audio only</span></span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+    <button class="btn btn-ghost btn-sm" onclick="window.nav('export');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes('Download'))n.classList.add('active')})">⬇ Download Data</button>
+    <button class="btn btn-ghost btn-sm" onclick="downloadBackup()">💾 Backup</button>
+    <button class="btn btn-ghost btn-sm" onclick="downloadPDF('full')">📄 Full PDF</button>
+    <button class="btn btn-ghost btn-sm" onclick="downloadAllCSV()">📊 All CSV</button>
+  </div>
+  <div id="quote-card" style="border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;background:linear-gradient(135deg,var(--bg2) 0%,rgba(201,149,106,0.06) 100%);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:120px;height:120px;border-radius:50%;background:var(--accent);opacity:0.04;transform:translate(30px,-30px)"></div>
+    <div style="position:absolute;bottom:0;left:0;width:80px;height:80px;border-radius:50%;background:var(--accent);opacity:0.03;transform:translate(-20px,20px)"></div>
+    <div style="font-size:10px;font-family:var(--mono);color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Daily Motivation</div>
+    <div id="quote-text" style="font-family:var(--head);font-size:17px;font-weight:700;color:var(--text);line-height:1.5;margin-bottom:8px"></div>
+    <div id="quote-author" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></div>
+    <button onclick="nextQuote()" style="position:absolute;top:16px;right:16px;background:var(--bg3);border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--mono);transition:all 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">↻ New</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ POMODORO ═══════════════════ -->
+<div class="page" id="page-timer">
+  <div class="page-header">
+    <h2>Pomodoro Timer</h2>
+    <p>50 min focus + 10 min break — your daily rhythm</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card" style="display:flex;flex-direction:column;align-items:stretch">
+      <div class="card-title">Focus Timer</div>
+      <div class="pomo-wrap">
+        <div class="pomo-mode-row">
+          <button class="pomo-mode-btn active" id="btn-focus" onclick="setMode('focus')">Focus 50m</button>
+          <button class="pomo-mode-btn" id="btn-short" onclick="setMode('short')">Break 10m</button>
+          <button class="pomo-mode-btn" id="btn-long" onclick="setMode('long')">Long 30m</button>
+        </div>
+        <div class="pomo-ring-wrap">
+          <svg class="pomo-svg" width="160" height="160" viewBox="0 0 160 160">
+            <circle class="pomo-ring-bg" cx="80" cy="80" r="68"/>
+            <circle class="pomo-ring-prog" id="pomo-prog" cx="80" cy="80" r="68"
+              stroke="var(--accent)"
+              stroke-dasharray="427"
+              stroke-dashoffset="0"/>
+          </svg>
+          <div class="pomo-time">
+            <div class="pomo-time-val" id="pomo-display">50:00</div>
+            <div class="pomo-time-label" id="pomo-label">Focus</div>
+          </div>
+        </div>
+        <div class="pomo-controls">
+          <button class="pomo-btn pomo-btn-reset" onclick="resetTimer()" title="Reset">↺</button>
+          <button class="pomo-btn pomo-btn-start" id="pomo-start-btn" onclick="toggleTimer()">▶</button>
+          <button class="pomo-btn pomo-btn-reset" onclick="skipTimer()" title="Skip">⏭</button>
+        </div>
+        <div class="pomo-sessions" id="pomo-dots">
+          <div class="pomo-dot" id="dot-0"></div>
+          <div class="pomo-dot" id="dot-1"></div>
+          <div class="pomo-dot" id="dot-2"></div>
+          <div class="pomo-dot" id="dot-3"></div>
+        </div>
+        <div class="pomo-subject" id="pomo-subject-label">Session 1 of 4</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Current Block</div>
+      <div id="timer-block-list"></div>
+      <div class="divider"></div>
+      <div class="card-title" style="margin-top:0">Today's Sessions</div>
+      <div id="pomo-session-log" style="font-size:13px;color:var(--text2)">No sessions yet today.</div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px">Sessions Today</div>
+          <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px" id="pomo-count">0</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px">Focus Time</div>
+          <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--green);letter-spacing:-1px" id="pomo-focustime">0m</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px">Streak</div>
+          <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--amber);letter-spacing:-1px" id="pomo-streak">0🔥</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pomodoro Rules</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;font-size:13px">
+      <div style="padding:14px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--accent);margin-bottom:6px">50 min</div>
+        <div style="color:var(--text2)">Full focus — phone face down, no interruptions</div>
+      </div>
+      <div style="padding:14px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--green);margin-bottom:6px">10 min</div>
+        <div style="color:var(--text2)">Stand up, stretch neck, drink water, walk</div>
+      </div>
+      <div style="padding:14px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-family:var(--head);font-size:20px;font-weight:800;color:var(--amber);margin-bottom:6px">4 sessions</div>
+        <div style="color:var(--text2)">After 4 sessions take a 30 min long break</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DAILY LOG ═══════════════════ -->
+<div class="page" id="page-log">
+  <div class="page-header">
+    <h2>Daily Log</h2>
+    <p>Enter once every night — your permanent study record</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">New Entry</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="log-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Study Hours</label>
+          <input type="number" class="form-input" id="log-hours" placeholder="e.g. 9" min="0" max="16" step="0.5">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">MCQs Solved</label>
+          <input type="number" class="form-input" id="log-mcqs" placeholder="e.g. 85" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pain Level (1–10)</label>
+          <input type="number" class="form-input" id="log-pain" placeholder="e.g. 3" min="1" max="10">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subjects Covered</label>
+        <div class="tag-row" id="subj-tags"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Blocks Completed (1–13)</label>
+        <input type="number" class="form-input" id="log-blocks" placeholder="e.g. 11" min="0" max="13">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Completed?</label>
+          <select class="form-input" id="log-completed">
+            <option value="Yes">Yes ✓</option>
+            <option value="No">No ✗</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="log-notes" placeholder="Optional">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveLog()" style="width:100%;justify-content:center;margin-top:4px">💾 Save Daily Log</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Entries</div>
+      <div id="log-recent"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Entries</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Hours</th><th>MCQs</th><th>Subjects</th><th>Pain</th><th>Blocks</th><th>Done</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="log-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ ERROR LOG ═══════════════════ -->
+<div class="page" id="page-errors">
+  <div class="page-header">
+    <h2>Error Log</h2>
+    <p>Log every wrong MCQ — review Concept errors first every Sunday</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="stat"><div class="stat-val" id="err-concept" style="color:var(--red)">0</div><div class="stat-label">Concept</div></div>
+    <div class="stat"><div class="stat-val" id="err-memory" style="color:var(--amber)">0</div><div class="stat-label">Memory</div></div>
+    <div class="stat"><div class="stat-val" id="err-silly" style="color:var(--blue)">0</div><div class="stat-label">Silly</div></div>
+    <div class="stat"><div class="stat-val" id="err-pending" style="color:var(--text3)">0</div><div class="stat-label">Pending Review</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Log New Error</div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="err-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Question (brief)</label>
+        <input type="text" class="form-input" id="err-question" placeholder="Write question in 5–10 words">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correct Answer</label>
+        <input type="text" class="form-input" id="err-answer" placeholder="Write the right answer">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Mistake Type</label>
+          <select class="form-input" id="err-type">
+            <option value="Concept">Concept</option>
+            <option value="Memory">Memory</option>
+            <option value="Silly">Silly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select class="form-input" id="err-subject">
+            <option>Pharmacology</option>
+            <option>Pharmaceutics</option>
+            <option>Pharma Chemistry</option>
+            <option>Jurisprudence</option>
+            <option>Pharmacognosy</option>
+            <option>Hospital Pharmacy</option>
+            <option>General Science/GK</option>
+            <option>Aptitude/Reasoning</option>
+            <option>Tamil</option>
+            <option>English</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-danger" onclick="saveError()" style="width:100%;justify-content:center">❌ Log Error</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pending Review</div>
+      <div id="errors-pending-list"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Errors</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Question</th><th>Correct Answer</th><th>Type</th><th>Subject</th><th>Reviewed</th><th></th></tr></thead>
+        <tbody id="errors-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SUBJECTS ═══════════════════ -->
+<div class="page" id="page-subjects">
+  <div class="page-header">
+    <h2>Subject Tracker</h2>
+    <p>85 topics — update status as you complete each one</p>
+  </div>
+  <div class="grid-2" id="subjects-grid"></div>
+</div>
+
+<!-- ═══════════════════ WEEKLY ═══════════════════ -->
+<div class="page" id="page-weekly">
+  <div class="page-header">
+    <h2>Weekly Review</h2>
+    <p>Fill every Sunday night — takes 10 minutes</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat"><div class="stat-val" id="w-hours">0<span>h</span></div><div class="stat-label">This Week Hours</div><div class="stat-sub">Target: 56–70h</div></div>
+    <div class="stat"><div class="stat-val" id="w-mcqs">0</div><div class="stat-label">This Week MCQs</div><div class="stat-sub">Target: 560+</div></div>
+    <div class="stat"><div class="stat-val" id="w-days">0<span>/7</span></div><div class="stat-label">Days Completed</div><div class="stat-sub">Target: 7/7</div></div>
+    <div class="stat"><div class="stat-val" id="w-pain">—</div><div class="stat-label">Avg Pain Level</div><div class="stat-sub">This week</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Save Weekly Review</div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Weak Subject 1</label>
+        <input type="text" class="form-input" id="w-weak1" placeholder="Subject name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Weak Subject 2</label>
+        <input type="text" class="form-input" id="w-weak2" placeholder="Subject name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Weak Subject 3</label>
+        <input type="text" class="form-input" id="w-weak3" placeholder="Subject name">
+      </div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Extra Focus Next Week</label>
+        <input type="text" class="form-input" id="w-focus" placeholder="Topic/subject">
+      </div>
+      <div class="form-group">
+        <label class="form-label">MCQ Target Next Week</label>
+        <input type="number" class="form-input" id="w-target" placeholder="e.g. 600">
+      </div>
+      <div class="form-group">
+        <label class="form-label">One Thing To Fix</label>
+        <input type="text" class="form-input" id="w-fix" placeholder="Be specific">
+      </div>
+    </div>
+    <button class="btn btn-success" onclick="saveWeekly()" style="margin-top:4px">📊 Save Weekly Review</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Past Weekly Reviews</div>
+    <div id="weekly-history"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ APPLICATIONS ═══════════════════ -->
+<div class="page" id="page-applications">
+  <div class="page-header">
+    <h2>Exam Applications</h2>
+    <p>Track every exam you apply for</p>
+  </div>
+  <div id="exam-cards"></div>
+  <button class="btn btn-primary" onclick="openModal('modal-app')" style="margin-top:8px">+ Add Exam</button>
+</div>
+
+<!-- ═══════════════════ FEES ═══════════════════ -->
+<div class="page" id="page-fees">
+  <div class="page-header">
+    <h2>Fees Tracker</h2>
+    <p>Every rupee you spend — auto totals by category</p>
+  </div>
+
+  <div class="grid-4" id="fee-stats">
+    <div class="stat"><div class="stat-val" id="fee-total" style="color:var(--green)">₹0</div><div class="stat-label">Total Spent</div></div>
+    <div class="stat"><div class="stat-val" id="fee-exam" style="font-size:20px">₹0</div><div class="stat-label">Exam Fees</div></div>
+    <div class="stat"><div class="stat-val" id="fee-books" style="font-size:20px">₹0</div><div class="stat-label">Books</div></div>
+    <div class="stat"><div class="stat-val" id="fee-travel" style="font-size:20px">₹0</div><div class="stat-label">Travel</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Expense</div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="fee-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Item / Exam</label>
+        <input type="text" class="form-input" id="fee-item" placeholder="e.g. MRB application fee">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="fee-cat">
+          <option>Exam Fee</option><option>Books</option><option>Travel</option><option>Stationery</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input type="number" class="form-input" id="fee-amount" placeholder="e.g. 500">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Mode</label>
+        <select class="form-input" id="fee-mode">
+          <option>UPI</option><option>Debit Card</option><option>Net Banking</option><option>Cash</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Receipt No.</label>
+        <input type="text" class="form-input" id="fee-ref" placeholder="Optional">
+      </div>
+    </div>
+    <button class="btn btn-success" onclick="saveFee()">💰 Add Expense</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Expenses</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Item</th><th>Category</th><th>Amount</th><th>Mode</th><th>Receipt</th><th></th></tr></thead>
+        <tbody id="fees-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HALL TICKETS ═══════════════════ -->
+<div class="page" id="page-halltix">
+  <div class="page-header">
+    <h2>Hall Tickets</h2>
+    <p>Exam dates, centres, admit cards — never miss anything</p>
+  </div>
+  <div id="ht-cards"></div>
+  <button class="btn btn-primary" onclick="openModal('modal-ht')" style="margin-top:8px">+ Add Exam Date</button>
+</div>
+
+<!-- ═══════════════════ RESULTS ═══════════════════ -->
+<div class="page" id="page-results">
+  <div class="page-header">
+    <h2>Results</h2>
+    <p>Your exam performance record</p>
+  </div>
+  <div id="results-cards"></div>
+  <button class="btn btn-primary" onclick="openModal('modal-result')" style="margin-top:8px">+ Add Result</button>
+</div>
+
+
+<!-- ═══════════════════ TRAVEL PLANNER ═══════════════════ -->
+<div class="page" id="page-travel">
+  <div class="page-header">
+    <h2>Travel Planner</h2>
+    <p>Plan your journey to every exam centre — no last-minute panic</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Add Travel Plan</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Exam Name</label>
+          <input class="form-input" id="tv-exam" placeholder="e.g. MRB Pharmacist">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exam Date</label>
+          <input type="date" class="form-input" id="tv-date">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Exam Centre City</label>
+          <input class="form-input" id="tv-city" placeholder="e.g. Chennai">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reporting Time</label>
+          <input class="form-input" id="tv-report" placeholder="e.g. 9:00 AM">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Travel Mode</label>
+          <select class="form-input" id="tv-mode">
+            <option>Bus</option><option>Train</option><option>Auto/Cab</option><option>Bike</option><option>Car</option><option>Flight</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Depart Time (planned)</label>
+          <input class="form-input" id="tv-depart" placeholder="e.g. 6:00 AM">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Travel Cost (₹)</label>
+          <input type="number" class="form-input" id="tv-cost" placeholder="e.g. 250">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stay Needed?</label>
+          <select class="form-input" id="tv-stay">
+            <option>No — same day return</option>
+            <option>Yes — 1 night</option>
+            <option>Yes — 2 nights</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hotel / Lodge Name & Cost (₹)</label>
+        <input class="form-input" id="tv-hotel" placeholder="e.g. Sri Murugan Lodge, ₹400/night">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emergency Contact (local)</label>
+        <input class="form-input" id="tv-contact" placeholder="Name and phone number">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input class="form-input" id="tv-notes" placeholder="Bus number, platform, any reminders">
+      </div>
+      <button class="btn btn-primary" onclick="saveTravel()" style="width:100%;justify-content:center;margin-top:4px">🚌 Save Travel Plan</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Travel Tips</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+          <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r2);border-left:3px solid var(--accent)">
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">Leave 2 hours early</div>
+            <div style="color:var(--text2)">Always buffer for traffic, wrong bus, or finding the centre</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r2);border-left:3px solid var(--green)">
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">Visit centre 1 day before</div>
+            <div style="color:var(--text2)">If possible, locate the hall the day before exam. No surprises.</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r2);border-left:3px solid var(--amber)">
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">Carry cash + UPI both</div>
+            <div style="color:var(--text2)">Auto drivers, tea, printing — always need cash nearby</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r2);border-left:3px solid var(--blue)">
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">Download offline maps</div>
+            <div style="color:var(--text2)">Google Maps offline for the exam area — no internet needed</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r2);border-left:3px solid var(--pink)">
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">Eat light on exam day</div>
+            <div style="color:var(--text2)">Idli/dosa preferred. Avoid heavy meals before exam.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:0">
+        <div class="card-title">Total Travel Budget</div>
+        <div style="font-family:var(--head);font-size:36px;font-weight:800;color:var(--accent);letter-spacing:-1px" id="tv-total">₹0</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">across all exam trips</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Travel Plans</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Exam</th><th>Date</th><th>City</th><th>Mode</th><th>Depart</th><th>Cost</th><th>Stay</th><th>Status</th><th></th></tr></thead>
+        <tbody id="travel-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ BAG CHECKLIST ═══════════════════ -->
+<div class="page" id="page-bagpack">
+  <div class="page-header">
+    <h2>Bag Checklist</h2>
+    <p>Pack the night before — never forget anything on exam day</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📋 Must Have — Documents</div>
+      <div id="bag-docs"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🖊 Must Have — Stationery</div>
+      <div id="bag-stationary"></div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">💊 Health & Comfort</div>
+      <div id="bag-health"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 Electronics & Others</div>
+      <div id="bag-others"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Custom Item</div>
+    <div class="form-row" style="align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Item Name</label>
+        <input class="form-input" id="bag-custom-item" placeholder="e.g. Lucky pen">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="bag-custom-cat">
+          <option>Documents</option><option>Stationery</option><option>Health</option><option>Others</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addBagItem()" style="height:42px;white-space:nowrap">+ Add Item</button>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+    <div style="font-size:13px;color:var(--text2)">Packed: <span id="bag-count" style="color:var(--accent);font-weight:700">0</span> items</div>
+    <button class="btn btn-ghost btn-sm" onclick="resetBag()">↺ Reset All</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ CERTIFICATES ═══════════════════ -->
+<div class="page" id="page-certificates">
+  <div class="page-header">
+    <h2>Certificate Verification</h2>
+    <p>Government jobs need many documents — track originals + photocopies</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📄 Essential Certificates</div>
+      <div id="cert-essential"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎓 Educational Certificates</div>
+      <div id="cert-education"></div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">👤 Identity & Community</div>
+      <div id="cert-identity"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💼 Experience & Others</div>
+      <div id="cert-experience"></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--amber);background:linear-gradient(135deg,var(--bg2),var(--amber-l))">
+    <div class="card-title" style="color:var(--amber)">⚠️ Verification Day Reminders</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div style="color:var(--text2)">✦ Carry <strong style="color:var(--text)">originals + 3 sets</strong> of all photocopies</div>
+      <div style="color:var(--text2)">✦ All copies must be <strong style="color:var(--text)">self-attested</strong></div>
+      <div style="color:var(--text2)">✦ Photos must be <strong style="color:var(--text)">recent (within 6 months)</strong></div>
+      <div style="color:var(--text2)">✦ Carry a <strong style="color:var(--text)">blue pen</strong> for signing on the spot</div>
+      <div style="color:var(--text2)">✦ Check certificate <strong style="color:var(--text)">spelling carefully</strong> — name, DOB</div>
+      <div style="color:var(--text2)">✦ Gazette for <strong style="color:var(--text)">name changes</strong> if applicable</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ GOALS ═══════════════════ -->
+<div class="page" id="page-goals">
+  <div class="page-header">
+    <h2>Goals Tracker</h2>
+    <p>Set targets — track progress — celebrate wins</p>
+  </div>
+
+  <div class="grid-3" id="goal-stats-row">
+    <div class="stat"><div class="stat-val" id="goal-total" style="color:var(--accent)">0</div><div class="stat-label">Total Goals</div></div>
+    <div class="stat"><div class="stat-val" id="goal-done" style="color:var(--green)">0</div><div class="stat-label">Achieved</div></div>
+    <div class="stat"><div class="stat-val" id="goal-pending" style="color:var(--amber)">0</div><div class="stat-label">In Progress</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Add New Goal</div>
+      <div class="form-group">
+        <label class="form-label">Goal</label>
+        <input class="form-input" id="goal-text" placeholder="e.g. Score 80+ in every MCQ session">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-input" id="goal-cat">
+            <option>Study</option><option>MCQ</option><option>Exam</option><option>Health</option><option>Personal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Date</label>
+          <input type="date" class="form-input" id="goal-date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-input" id="goal-priority">
+          <option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="saveGoal()" style="width:100%;justify-content:center">🎯 Add Goal</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Goals</div>
+      <div id="goals-active"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Goals</div>
+    <div id="goals-all"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HEALTH LOG ═══════════════════ -->
+<div class="page" id="page-health">
+  <div class="page-header">
+    <h2>Health Log</h2>
+    <p>Track fibromyalgia, neck pain, and daily wellness — study smart not hard</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat"><div class="stat-val" id="h-avg-pain" style="color:var(--accent)">—</div><div class="stat-label">Avg Pain (7 days)</div></div>
+    <div class="stat"><div class="stat-val" id="h-good-days" style="color:var(--green)">0</div><div class="stat-label">Good Days (pain ≤4)</div></div>
+    <div class="stat"><div class="stat-val" id="h-bad-days" style="color:var(--red)">0</div><div class="stat-label">Hard Days (pain ≥7)</div></div>
+    <div class="stat"><div class="stat-val" id="h-stretch-days" style="color:var(--amber)">0</div><div class="stat-label">Stretch Done</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Log Today's Health</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="h-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pain Level (1–10)</label>
+          <input type="number" class="form-input" id="h-pain" min="1" max="10" placeholder="e.g. 3">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Neck Pain Specific (1–10)</label>
+          <input type="number" class="form-input" id="h-neck" min="1" max="10" placeholder="C5–C6 area">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sleep Hours</label>
+          <input type="number" class="form-input" id="h-sleep" min="0" max="12" step="0.5" placeholder="e.g. 7">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Neck Stretch Done?</label>
+          <select class="form-input" id="h-stretch">
+            <option>Yes</option><option>No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mood</label>
+          <select class="form-input" id="h-mood">
+            <option>Good 😊</option><option>Okay 😐</option><option>Tired 😴</option><option>Anxious 😰</option><option>Bad 😞</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Medication Taken?</label>
+        <input class="form-input" id="h-meds" placeholder="e.g. Pregabalin, Ibuprofen or None">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input class="form-input" id="h-notes" placeholder="Any symptoms, triggers, observations">
+      </div>
+      <button class="btn btn-success" onclick="saveHealth()" style="width:100%;justify-content:center">💊 Save Health Log</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Neck Care Routine</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);display:flex;gap:10px;align-items:flex-start">
+            <span style="color:var(--accent);font-weight:700;min-width:20px">1</span>
+            <div><div style="color:var(--text);font-weight:500">Every 50 min break</div><div style="color:var(--text2)">Chin tuck — 10 reps. Gentle neck rotation left/right.</div></div>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);display:flex;gap:10px;align-items:flex-start">
+            <span style="color:var(--green);font-weight:700;min-width:20px">2</span>
+            <div><div style="color:var(--text);font-weight:500">Sitting posture</div><div style="color:var(--text2)">Screen at eye level. Back straight. Feet flat on floor.</div></div>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);display:flex;gap:10px;align-items:flex-start">
+            <span style="color:var(--amber);font-weight:700;min-width:20px">3</span>
+            <div><div style="color:var(--text);font-weight:500">Pain > 6 action</div><div style="color:var(--text2)">Stop screen. Lie down flat. Hot water bag on neck 15 min.</div></div>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);display:flex;gap:10px;align-items:flex-start">
+            <span style="color:var(--blue);font-weight:700;min-width:20px">4</span>
+            <div><div style="color:var(--text);font-weight:500">Morning routine</div><div style="color:var(--text2)">5 min neck stretches before studying. Never skip.</div></div>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);display:flex;gap:10px;align-items:flex-start">
+            <span style="color:var(--red);font-weight:700;min-width:20px">5</span>
+            <div><div style="color:var(--text);font-weight:500">Anxiety management</div><div style="color:var(--text2)">4-7-8 breathing: Inhale 4s, hold 7s, exhale 8s. Repeat 4x.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Recent Health Entries</div>
+        <div id="health-recent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ EXPORT ═══════════════════ -->
+<div class="page" id="page-export">
+  <div class="page-header">
+    <h2>Download Data</h2>
+    <p>Export your study records as PDF or Excel — backup anytime</p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- PDF DOWNLOADS -->
+    <div class="card">
+      <div class="card-title">📄 PDF Downloads</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--red-l);border:1px solid rgba(224,96,112,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📋</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Daily Log Report</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">All study entries — date, hours, MCQs, pain</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadPDF('daily')" style="background:var(--red-l);color:var(--red);border:1px solid rgba(224,96,112,0.3);white-space:nowrap">PDF ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--amber-l);border:1px solid rgba(212,152,10,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">❌</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Error Log Report</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">All wrong MCQs — question, answer, type</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadPDF('errors')" style="background:var(--amber-l);color:var(--amber);border:1px solid rgba(212,152,10,0.3);white-space:nowrap">PDF ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--green-l);border:1px solid rgba(62,203,138,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💰</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Fees & Expenses Report</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">All payments — exam fees, books, travel</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadPDF('fees')" style="background:var(--green-l);color:var(--green);border:1px solid rgba(62,203,138,0.3);white-space:nowrap">PDF ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--blue-l);border:1px solid rgba(122,176,224,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📜</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Full Summary Report</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Everything — logs, errors, fees, goals, health</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="downloadPDF('full')" style="white-space:nowrap">Full PDF ↓</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EXCEL DOWNLOADS -->
+    <div class="card">
+      <div class="card-title">📊 Excel / CSV Downloads</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#0a2818;border:1px solid rgba(62,203,138,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📅</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Daily Log — CSV</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Open in Excel, Google Sheets</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadCSV('logs')" style="background:#0a2818;color:var(--green);border:1px solid rgba(62,203,138,0.3);white-space:nowrap">CSV ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#0a2818;border:1px solid rgba(62,203,138,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">❌</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Error Log — CSV</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">All wrong MCQs in spreadsheet</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadCSV('errors')" style="background:#0a2818;color:var(--green);border:1px solid rgba(62,203,138,0.3);white-space:nowrap">CSV ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#0a2818;border:1px solid rgba(62,203,138,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💰</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Fees Tracker — CSV</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">All expenses in spreadsheet</div>
+          </div>
+          <button class="btn btn-sm" onclick="downloadCSV('fees')" style="background:#0a2818;color:var(--green);border:1px solid rgba(62,203,138,0.3);white-space:nowrap">CSV ↓</button>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#0a2818;border:1px solid rgba(62,203,138,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📦</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">All Data — CSV Pack</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Downloads all CSVs one by one</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="downloadAllCSV()" style="white-space:nowrap">All CSV ↓</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA STATS -->
+  <div class="card">
+    <div class="card-title">📦 Data Summary — What Will Be Exported</div>
+    <div class="grid-4" id="export-stats" style="margin-bottom:0">
+      <div class="stat"><div class="stat-val" id="ex-logs" style="color:var(--accent)">0</div><div class="stat-label">Daily Logs</div></div>
+      <div class="stat"><div class="stat-val" id="ex-errors" style="color:var(--red)">0</div><div class="stat-label">Error Entries</div></div>
+      <div class="stat"><div class="stat-val" id="ex-fees" style="color:var(--green)">0</div><div class="stat-label">Fee Entries</div></div>
+      <div class="stat"><div class="stat-val" id="ex-size" style="color:var(--blue)">0kb</div><div class="stat-label">Total Data Size</div></div>
+    </div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="card" style="border-color:rgba(196,154,108,0.3);background:linear-gradient(135deg,var(--bg2),var(--accent-l))">
+    <div class="card-title" style="color:var(--gold)">💾 Full Backup — JSON</div>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;font-size:13px;color:var(--text2)">Export ALL your data as a JSON backup file. Reimport anytime if you switch devices or clear the browser.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="downloadBackup()">⬇ Download Backup</button>
+        <label class="btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);cursor:pointer">
+          ↑ Restore Backup
+          <input type="file" accept=".json" onchange="restoreBackup(event)" style="display:none">
+        </label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-app">
+  <div class="modal">
+    <div class="modal-title">Add Exam Application</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Exam Name</label><input class="form-input" id="app-name" placeholder="e.g. MRB Pharmacist"></div><div class="form-group"><label class="form-label">Conducting Body</label><input class="form-input" id="app-body" placeholder="e.g. Tamil Nadu MRB"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Apply Last Date</label><input type="date" class="form-input" id="app-deadline"></div><div class="form-group"><label class="form-label">Application No.</label><input class="form-input" id="app-appno" placeholder="After applying"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Fees Paid (₹)</label><input type="number" class="form-input" id="app-fees" placeholder="0"></div><div class="form-group"><label class="form-label">Status</label><select class="form-input" id="app-status"><option>Not applied</option><option>Applied</option><option>Rejected</option></select></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-app')">Cancel</button><button class="btn btn-primary" onclick="saveApp()">Save</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ht">
+  <div class="modal">
+    <div class="modal-title">Add Hall Ticket / Exam Date</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Exam Name</label><input class="form-input" id="ht-name" placeholder="e.g. MRB Pharmacist"></div><div class="form-group"><label class="form-label">Exam Date</label><input type="date" class="form-input" id="ht-date"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Reporting Time</label><input class="form-input" id="ht-time" placeholder="e.g. 9:00 AM"></div><div class="form-group"><label class="form-label">Hall Ticket No.</label><input class="form-input" id="ht-no" placeholder="After download"></div></div>
+    <div class="form-group"><label class="form-label">Exam Centre</label><input class="form-input" id="ht-centre" placeholder="Centre name and address"></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">HT Downloaded?</label><select class="form-input" id="ht-dl"><option>No</option><option>Yes</option></select></div><div class="form-group"><label class="form-label">Travel Arranged?</label><select class="form-input" id="ht-travel"><option>No</option><option>Yes</option></select></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-ht')">Cancel</button><button class="btn btn-primary" onclick="saveHT()">Save</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-result">
+  <div class="modal">
+    <div class="modal-title">Add Exam Result</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Exam Name</label><input class="form-input" id="res-name" placeholder="e.g. MRB Pharmacist"></div><div class="form-group"><label class="form-label">Exam Date</label><input type="date" class="form-input" id="res-date"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Attended?</label><select class="form-input" id="res-att"><option>No</option><option>Yes</option></select></div><div class="form-group"><label class="form-label">Total Questions</label><input type="number" class="form-input" id="res-total" placeholder="e.g. 100"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Attempted</label><input type="number" class="form-input" id="res-att2" placeholder="e.g. 90"></div><div class="form-group"><label class="form-label">Correct (est.)</label><input type="number" class="form-input" id="res-correct" placeholder="e.g. 72"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Score (est.)</label><input type="number" class="form-input" id="res-score" placeholder="e.g. 72"></div><div class="form-group"><label class="form-label">Result Status</label><select class="form-input" id="res-status"><option>Pending</option><option>Cleared</option><option>Not cleared</option><option>Waiting</option></select></div></div>
+    <div class="form-group"><label class="form-label">Remarks</label><input class="form-input" id="res-remarks" placeholder="Any notes"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-result')">Cancel</button><button class="btn btn-primary" onclick="saveResult()">Save</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// FIREBASE CONFIG — Replace with your own config
+// Get from: console.firebase.google.com → Project Settings
+// ═══════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_YOUR_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+  storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
+  appId: "PASTE_YOUR_APP_ID_HERE"
+};
+
+// ── FIREBASE INIT ─────────────────────────────────
+let app, auth, db, currentUser = null, syncEnabled = false;
+
+function initFirebase(){
+  try {
+    app = firebase.initializeApp(FIREBASE_CONFIG);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    syncEnabled = true;
+
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if(user){
+        document.getElementById('login-overlay').style.display='none';
+        updateSyncBadge(true, user.displayName||user.email);
+        syncFromCloud();
+      } else {
+        updateSyncBadge(false, 'Not signed in');
+      }
+    });
+  } catch(e){
+    console.log('Firebase not configured — using offline mode');
+    syncEnabled = false;
+  }
+}
+
+function updateSyncBadge(online, label){
+  const dot=document.getElementById('sync-dot');
+  const status=document.getElementById('sync-status');
+  if(dot) dot.style.background=online?'var(--green)':'var(--text3)';
+  if(status) status.textContent=online?'Synced':'Offline';
+}
+
+function showSyncBar(show){
+  const bar=document.getElementById('sync-bar');
+  if(bar) bar.style.display=show?'block':'none';
+}
+
+async function signInGoogle(){
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    toast('Signed in! Syncing data... ✓');
+  } catch(e){ toast('Sign in failed: '+e.message,'error'); }
+}
+
+function skipLogin(){
+  document.getElementById('login-overlay').style.display='none';
+  updateSyncBadge(false,'Offline mode');
+  toast('Using offline mode — data saved locally');
+}
+
+function signOut(){
+  if(auth) auth.signOut();
+  updateSyncBadge(false,'Signed out');
+  toast('Signed out');
+}
+
+// ── CLOUD SYNC ────────────────────────────────────
+const SYNC_KEYS=['logs','errors','fees','travels','goals','healthlogs','weekly','applications','halltix','results'];
+
+async function syncToCloud(){
+  if(!syncEnabled||!currentUser||!db) return;
+  showSyncBar(true);
+  try{
+    const data={};
+    SYNC_KEYS.forEach(k=>{ data[k]=DB_local.get(k); });
+    data.subj_progress=DB_local.getObj('subj_progress',{});
+    data.cert_status=DB_local.getObj('cert_status',{});
+    data.updatedAt=new Date().toISOString();
+    await db.collection('users').doc(currentUser.uid).set(data,{merge:true});
+    updateSyncBadge(true,'Synced');
+  } catch(e){ console.error('Sync error:',e); updateSyncBadge(false,'Sync failed'); }
+  showSyncBar(false);
+}
+
+async function syncFromCloud(){
+  if(!syncEnabled||!currentUser||!db) return;
+  showSyncBar(true);
+  try{
+    const doc=await db.collection('users').doc(currentUser.uid).get();
+    if(doc.exists){
+      const data=doc.data();
+      SYNC_KEYS.forEach(k=>{ if(data[k]) DB_local.set(k,data[k]); });
+      if(data.subj_progress) DB_local.setObj('subj_progress',data.subj_progress);
+      if(data.cert_status) DB_local.setObj('cert_status',data.cert_status);
+      renderDashboard();
+      updateSyncBadge(true,'Synced');
+      toast('Data synced from cloud ☁️');
+    }
+  } catch(e){ console.error('Sync error:',e); }
+  showSyncBar(false);
+}
+
+// ── LOCAL STORAGE (offline fallback) ─────────────
+const DB_local = {
+  get:(k)=>{ try{ return JSON.parse(localStorage.getItem('examhq_'+k)||'[]'); }catch(e){return [];} },
+  set:(k,v)=>{ localStorage.setItem('examhq_'+k,JSON.stringify(v)); },
+  getObj:(k,def={})=>{ try{ return JSON.parse(localStorage.getItem('examhq_'+k)||JSON.stringify(def)); }catch(e){return def;} },
+  setObj:(k,v)=>{ localStorage.setItem('examhq_'+k,JSON.stringify(v)); }
+};
+
+// ── UNIFIED DB — auto syncs to cloud after every write ──
+let syncTimer=null;
+const DB = {
+  get:(k)=>DB_local.get(k),
+  set:(k,v)=>{ DB_local.set(k,v); scheduleSync(); },
+  getObj:(k,def={})=>DB_local.getObj(k,def),
+  setObj:(k,v)=>{ DB_local.setObj(k,v); scheduleSync(); }
+};
+
+function scheduleSync(){
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>syncToCloud(),2000);
+}
+
+// ── STATIC DATA ──────────────────────────────────
+const BLOCKS = [
+  {n:'B1', t:'7:00–7:50 AM',   s:'Pharmacology',                   m:'15 MCQs'},
+  {n:'B2', t:'8:00–8:50 AM',   s:'Pharmaceutics',                   m:'15 MCQs'},
+  {n:'B3', t:'9:00–9:50 AM',   s:'Pharma Chemistry / Jurisprudence',m:'10 MCQs'},
+  {n:'B4', t:'10:00–10:50 AM', s:'General Science / GK',            m:'10 MCQs'},
+  {n:'—',  t:'11:00–12:00 PM', s:'🍽 Lunch + Rest',                 m:'—', brk:true},
+  {n:'B5', t:'12:00–12:50 PM', s:'Pharmacognosy / Hospital Pharmacy',m:'10 MCQs'},
+  {n:'B6', t:'1:00–1:50 PM',   s:'Aptitude / Reasoning',            m:'15 MCQs'},
+  {n:'B7', t:'2:00–2:50 PM',   s:'Skill Block (Rx / CPR / Storage)',m:'Writing'},
+  {n:'B8', t:'3:00–3:50 PM',   s:'Tamil (TNPSC)',                   m:'—'},
+  {n:'—',  t:'4:00–4:20 PM',   s:'☕ Tea break',                    m:'—', brk:true},
+  {n:'B9', t:'4:20–5:10 PM',   s:'English (5 words + 1 rule)',      m:'—'},
+  {n:'B10',t:'5:20–6:10 PM',   s:'Revision — Morning blocks',       m:'—'},
+  {n:'B11',t:'6:20–7:10 PM',   s:'Revision — Afternoon blocks',     m:'—'},
+  {n:'—',  t:'7:20–8:00 PM',   s:'🍽 Dinner + Rest',                m:'—', brk:true},
+  {n:'B12',t:'8:00–8:50 PM',   s:'Mixed MCQs — timed',             m:'20 MCQs'},
+  {n:'B13',t:'9:00–9:30 PM',   s:'Day review + error log',          m:'—'},
+];
+
+const CHECKLIST = [
+  'Pharmacy blocks done',
+  '80+ MCQs solved today',
+  'General studies done',
+  'Tamil done',
+  'English done (5 words + 1 rule)',
+  'Revision done — morning + afternoon',
+  'Error log updated',
+  'Daily tracker row filled',
+  'No phone scrolling during blocks',
+  'Neck stretch done between blocks',
+];
+
+const SUBJECTS = [
+  {cat:'💊 Pharmacology', color:'var(--accent)', topics:['ANS — Cholinergic drugs','ANS — Adrenergic drugs','Cardiovascular (CVS)','CNS pharmacology','Autacoids','Antibiotics','Antifungals / Antivirals','Antitubercular','Endocrine pharmacology','Diuretics','NSAIDs / Analgesics']},
+  {cat:'🧪 Pharmaceutics', color:'var(--blue)', topics:['Tablets — types','Tablets — defects','Capsules','Solutions / Syrups','Suspensions / Emulsions','Ointments / Creams','Suppositories','Parenterals','Aerosols','Packaging / Storage']},
+  {cat:'⚗️ Pharma Chemistry', color:'var(--amber)', topics:['Acids, Bases, Buffers','Henderson-Hasselbalch','Organic functional groups','Steroids','Vitamins','Sulphonamides','Analgesic chemistry']},
+  {cat:'⚖️ Jurisprudence', color:'var(--green)', topics:['Drugs & Cosmetics Act 1940','Drug Schedules H, H1, X','Pharmacy Act 1948','Narcotic Drugs Act','DPCO','Prescription requirements','Record keeping']},
+  {cat:'🌿 Pharmacognosy', color:'#9b5de5', topics:['Solanaceae','Apocynaceae','Leguminosae','Alkaloids','Glycosides','Tannins / Resins','Volatile oils','Carbohydrates']},
+  {cat:'🏥 Hospital Pharmacy', color:'var(--accent)', topics:['Drug info services','Dispensing / Labelling','Drug storage','Cold chain','Medication errors','Formulary systems','Latin abbreviations']},
+  {cat:'🔬 General Science / GK', color:'var(--blue)', topics:['Biology — Cell','Human body systems','Physics basics','Chemistry basics','Current affairs TN','Current affairs India','Geography','Sangam history','Constitution basics']},
+  {cat:'🔢 Aptitude / Reasoning', color:'var(--amber)', topics:['Number series','Ratio / Proportion','Percentages','Time and work','Distance / Speed','Coding / Decoding','Blood relations','Syllogisms']},
+  {cat:'🔤 Tamil (TNPSC)', color:'var(--green)', topics:['Grammar basics','Sangam literature','Medieval literature','Tamil GK','Proverbs / Idioms','Fill in blanks','Comprehension']},
+  {cat:'🔡 English', color:'var(--red)', topics:['Vocabulary daily','Tenses','Prepositions','Articles','Subject-verb agreement','Comprehension','Sentence correction']},
+];
+
+const SUBJ_NAMES = ['Pharmacology','Pharmaceutics','Pharma Chemistry','Jurisprudence','Pharmacognosy','Hospital Pharmacy','General Science/GK','Aptitude/Reasoning','Tamil','English'];
+
+// ── NAVIGATION ───────────────────────────────────
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  renderPage(id);
+}
+
+/* renderPage handled in Pomodoro section */
+
+// ── UTILS ────────────────────────────────────────
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmt(d) { if(!d) return '—'; const dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+function toast(msg,type='') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function del(arr,i){arr.splice(i,1);return arr}
+
+// ── DASHBOARD ────────────────────────────────────
+function renderDashboard() {
+  const now = new Date();
+  document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('today-pill').textContent = now.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  showQuote();
+
+  const logs = DB.get('logs');
+  const errors = DB.get('errors');
+  const week = logs.filter(l=>{ const d=new Date(l.date); const w=new Date(); w.setDate(w.getDate()-7); return d>=w; });
+
+  document.getElementById('stat-days').textContent = logs.length;
+  document.getElementById('stat-hrs').innerHTML = (week.reduce((a,b)=>a+(+b.hours||0),0)).toFixed(1)+'<span>h</span>';
+  document.getElementById('stat-mcq').textContent = week.reduce((a,b)=>a+(+b.mcqs||0),0);
+  document.getElementById('stat-errors').textContent = errors.length;
+
+  // Checklist
+  const checks = DB.getObj('checks_'+today(), {});
+  let done=0;
+  document.getElementById('checklist-items').innerHTML = CHECKLIST.map((c,i)=>{
+    const d = checks[i];
+    if(d) done++;
+    return `<div class="check-item" onclick="toggleCheck(${i})">
+      <div class="check-box ${d?'done':''}"></div>
+      <span class="check-label ${d?'done':''}">${c}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('check-count').textContent = `${done}/10`;
+  document.getElementById('check-bar').style.width = (done/10*100)+'%';
+
+  // Blocks
+  document.getElementById('blocks-list').innerHTML = BLOCKS.slice(0,8).map(b=>`
+    <div class="block-item ${b.brk?'break-item':''}">
+      <span class="block-num">${b.n}</span>
+      <span class="block-time">${b.t}</span>
+      <span class="block-subj">${b.s}</span>
+      <span class="block-mcq">${b.m}</span>
+    </div>`).join('');
+}
+
+function toggleCheck(i) {
+  const checks = DB.getObj('checks_'+today(), {});
+  checks[i] = !checks[i];
+  DB.setObj('checks_'+today(), checks);
+  renderDashboard();
+}
+
+// ── DAILY LOG ────────────────────────────────────
+let selectedSubjs = [];
+
+function renderLog() {
+  document.getElementById('log-date').value = today();
+  document.getElementById('err-date').value = today();
+
+  // Subject tags
+  document.getElementById('subj-tags').innerHTML = SUBJ_NAMES.map(s=>`
+    <span class="subj-tag ${selectedSubjs.includes(s)?'sel':''}" onclick="toggleSubj('${s}')">${s}</span>`).join('');
+
+  const logs = DB.get('logs').slice().reverse();
+  // Recent
+  document.getElementById('log-recent').innerHTML = logs.slice(0,5).map(l=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3);min-width:80px">${fmt(l.date)}</span>
+      <span style="font-size:12px;color:var(--text);flex:1">${l.hours}h · ${l.mcqs} MCQs</span>
+      <span class="badge ${l.completed==='Yes'?'badge-green':'badge-red'}">${l.completed}</span>
+    </div>`).join('') || '<p style="color:var(--text3);font-size:13px">No entries yet</p>';
+
+  // Table
+  document.getElementById('log-table').innerHTML = logs.map((l,i)=>`
+    <tr>
+      <td><span style="font-family:var(--mono);font-size:11px">${fmt(l.date)}</span></td>
+      <td>${l.hours}h</td>
+      <td>${l.mcqs}</td>
+      <td><span style="font-size:12px">${(l.subjects||[]).join(', ')||'—'}</span></td>
+      <td>${l.pain}</td>
+      <td>${l.blocks||'—'}</td>
+      <td><span class="badge ${l.completed==='Yes'?'badge-green':'badge-red'}">${l.completed}</span></td>
+      <td style="font-size:12px;color:var(--text3)">${l.notes||'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteLog(${logs.length-1-i})">✕</button></td>
+    </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px">No entries yet</td></tr>';
+}
+
+function toggleSubj(s) {
+  if(selectedSubjs.includes(s)) selectedSubjs=selectedSubjs.filter(x=>x!==s);
+  else selectedSubjs.push(s);
+  document.getElementById('subj-tags').innerHTML = SUBJ_NAMES.map(s2=>`
+    <span class="subj-tag ${selectedSubjs.includes(s2)?'sel':''}" onclick="toggleSubj('${s2}')">${s2}</span>`).join('');
+}
+
+function saveLog() {
+  const date = document.getElementById('log-date').value;
+  const hours = document.getElementById('log-hours').value;
+  const mcqs = document.getElementById('log-mcqs').value;
+  const pain = document.getElementById('log-pain').value;
+  const blocks = document.getElementById('log-blocks').value;
+  const completed = document.getElementById('log-completed').value;
+  const notes = document.getElementById('log-notes').value;
+  if(!date||!hours||!mcqs) { toast('Fill Date, Hours and MCQs!','error'); return; }
+  const logs = DB.get('logs');
+  logs.push({date,hours:+hours,mcqs:+mcqs,pain:+pain,blocks:+blocks,completed,notes,subjects:[...selectedSubjs]});
+  DB.set('logs',logs);
+  selectedSubjs=[];
+  ['log-hours','log-mcqs','log-pain','log-blocks','log-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('log-date').value=today();
+  toast('Daily log saved! ✓');
+  renderLog();
+}
+
+function deleteLog(i) {
+  if(!confirm('Delete this entry?')) return;
+  const logs = DB.get('logs'); del(logs,i); DB.set('logs',logs); renderLog();
+}
+
+// ── ERROR LOG ────────────────────────────────────
+function renderErrors() {
+  const errors = DB.get('errors').slice().reverse();
+  const concept = errors.filter(e=>e.type==='Concept').length;
+  const memory  = errors.filter(e=>e.type==='Memory').length;
+  const silly   = errors.filter(e=>e.type==='Silly').length;
+  const pending = errors.filter(e=>e.reviewed!=='Yes').length;
+  document.getElementById('err-concept').textContent = concept;
+  document.getElementById('err-memory').textContent  = memory;
+  document.getElementById('err-silly').textContent   = silly;
+  document.getElementById('err-pending').textContent = pending;
+
+  document.getElementById('errors-pending-list').innerHTML = errors.filter(e=>e.reviewed!=='Yes').slice(0,6).map((e,i)=>`
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span class="badge ${e.type==='Concept'?'badge-red':e.type==='Memory'?'badge-amber':'badge-blue'}">${e.type}</span>
+        <span style="font-size:11px;color:var(--text3)">${e.subject}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text)">${e.question}</div>
+      <div style="font-size:11px;color:var(--green);margin-top:2px">→ ${e.answer}</div>
+    </div>`).join('') || '<p style="color:var(--text3);font-size:13px;padding:8px 0">All reviewed! ✓</p>';
+
+  document.getElementById('errors-table').innerHTML = errors.map((e,i)=>`
+    <tr>
+      <td><span style="font-family:var(--mono);font-size:11px">${fmt(e.date)}</span></td>
+      <td style="font-size:12px">${e.question}</td>
+      <td style="font-size:12px;color:var(--green)">${e.answer}</td>
+      <td><span class="badge ${e.type==='Concept'?'badge-red':e.type==='Memory'?'badge-amber':'badge-blue'}">${e.type}</span></td>
+      <td><span style="font-size:12px">${e.subject}</span></td>
+      <td>
+        <select onchange="markReviewed(${errors.length-1-i},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:6px;font-size:11px">
+          <option ${e.reviewed!=='Yes'?'selected':''}>No</option>
+          <option ${e.reviewed==='Yes'?'selected':''}>Yes</option>
+        </select>
+      </td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteError(${errors.length-1-i})">✕</button></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No errors logged yet</td></tr>';
+}
+
+function saveError() {
+  const date=document.getElementById('err-date').value;
+  const question=document.getElementById('err-question').value;
+  const answer=document.getElementById('err-answer').value;
+  const type=document.getElementById('err-type').value;
+  const subject=document.getElementById('err-subject').value;
+  if(!question||!answer) { toast('Fill Question and Answer!','error'); return; }
+  const errors=DB.get('errors');
+  errors.push({date,question,answer,type,subject,reviewed:'No'});
+  DB.set('errors',errors);
+  ['err-question','err-answer'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('err-date').value=today();
+  toast('Error logged! ✓');
+  renderErrors();
+}
+
+function markReviewed(i,val) {
+  const errors=DB.get('errors'); errors[i].reviewed=val; DB.set('errors',errors); renderErrors();
+}
+
+function deleteError(i) {
+  if(!confirm('Delete?')) return;
+  const errors=DB.get('errors'); del(errors,i); DB.set('errors',errors); renderErrors();
+}
+
+// ── SUBJECTS ─────────────────────────────────────
+function renderSubjects() {
+  const prog = DB.getObj('subj_progress',{});
+  document.getElementById('subjects-grid').innerHTML = SUBJECTS.map(s=>`
+    <div class="card">
+      <div class="card-title" style="color:${s.color}">${s.cat}</div>
+      ${s.topics.map((t,i)=>{
+        const key=s.cat+'_'+i;
+        const status=prog[key]||'Not started';
+        const color=status==='Done'?'var(--green)':status==='In progress'?'var(--amber)':status==='Need revision'?'var(--red)':'var(--text3)';
+        return `<div class="subj-row">
+          <span class="subj-name">${t}</span>
+          <select onchange="updateSubj('${key}',this.value)" style="background:var(--bg3);border:1px solid var(--border);color:${color};padding:3px 8px;border-radius:6px;font-size:11px;font-family:var(--mono)">
+            <option ${status==='Not started'?'selected':''}>Not started</option>
+            <option ${status==='In progress'?'selected':''}>In progress</option>
+            <option ${status==='Done'?'selected':''}>Done</option>
+            <option ${status==='Need revision'?'selected':''}>Need revision</option>
+          </select>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:var(--mono)">
+        ${s.topics.filter((_,i)=>prog[s.cat+'_'+i]==='Done').length} / ${s.topics.length} done
+      </div>
+      <div class="progress-wrap" style="margin-top:6px">
+        <div class="progress-bar green" style="width:${s.topics.filter((_,i)=>prog[s.cat+'_'+i]==='Done').length/s.topics.length*100}%"></div>
+      </div>
+    </div>`).join('');
+}
+
+function updateSubj(key,val) {
+  const prog=DB.getObj('subj_progress',{}); prog[key]=val; DB.setObj('subj_progress',prog); renderSubjects();
+}
+
+// ── WEEKLY ───────────────────────────────────────
+function renderWeekly() {
+  const logs=DB.get('logs');
+  const now=new Date();
+  const week=logs.filter(l=>{ const d=new Date(l.date); const w=new Date(); w.setDate(w.getDate()-7); return d>=w; });
+  const hrs=week.reduce((a,b)=>a+(+b.hours||0),0);
+  const mcqs=week.reduce((a,b)=>a+(+b.mcqs||0),0);
+  const days=week.filter(l=>l.completed==='Yes').length;
+  const pains=week.filter(l=>l.pain>0).map(l=>l.pain);
+  const avgPain=pains.length?( pains.reduce((a,b)=>a+b,0)/pains.length).toFixed(1):'—';
+  document.getElementById('w-hours').innerHTML=hrs.toFixed(1)+'<span>h</span>';
+  document.getElementById('w-mcqs').textContent=mcqs;
+  document.getElementById('w-days').innerHTML=days+'<span>/7</span>';
+  document.getElementById('w-pain').textContent=avgPain;
+
+  const reviews=DB.get('weekly').slice().reverse();
+  document.getElementById('weekly-history').innerHTML=reviews.slice(0,5).map(r=>`
+    <div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">${fmt(r.date)}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text2)">
+        <span>Weak: <strong style="color:var(--text)">${[r.weak1,r.weak2,r.weak3].filter(Boolean).join(', ')||'—'}</strong></span>
+        <span>Focus: <strong style="color:var(--accent)">${r.focus||'—'}</strong></span>
+        <span>Fix: <strong style="color:var(--amber)">${r.fix||'—'}</strong></span>
+      </div>
+    </div>`).join('') || '<p style="color:var(--text3);font-size:13px;padding:10px 0">No reviews yet</p>';
+}
+
+function saveWeekly() {
+  const r={
+    date:today(),
+    weak1:document.getElementById('w-weak1').value,
+    weak2:document.getElementById('w-weak2').value,
+    weak3:document.getElementById('w-weak3').value,
+    focus:document.getElementById('w-focus').value,
+    target:document.getElementById('w-target').value,
+    fix:document.getElementById('w-fix').value,
+  };
+  const reviews=DB.get('weekly'); reviews.push(r); DB.set('weekly',reviews);
+  ['w-weak1','w-weak2','w-weak3','w-focus','w-target','w-fix'].forEach(id=>document.getElementById(id).value='');
+  toast('Weekly review saved! ✓'); renderWeekly();
+}
+
+// ── APPLICATIONS ─────────────────────────────────
+const DEFAULT_APPS=[
+  {name:'MRB Pharmacist',body:'Tamil Nadu MRB',deadline:'',appno:'',fees:'',status:'Not applied'},
+  {name:'RRB Paramedical',body:'Railway RRB',deadline:'',appno:'',fees:'',status:'Not applied'},
+  {name:'TNPSC Group 4',body:'TNPSC',deadline:'',appno:'',fees:'',status:'Not applied'},
+  {name:'TNPSC Group 2A',body:'TNPSC',deadline:'',appno:'',fees:'',status:'Not applied'},
+  {name:'NIT Trichy',body:'NIT Trichy',deadline:'',appno:'',fees:'',status:'Not applied'},
+  {name:'ESIC Pharmacist',body:'ESIC',deadline:'',appno:'',fees:'',status:'Not applied'},
+];
+
+function renderApps() {
+  let apps=DB.get('applications');
+  if(!apps.length){ DB.set('applications',DEFAULT_APPS); apps=DEFAULT_APPS; }
+  const colors={'Not applied':'var(--text3)','Applied':'var(--green)','Rejected':'var(--red)'};
+  const badges={'Not applied':'badge-amber','Applied':'badge-green','Rejected':'badge-red'};
+  document.getElementById('exam-cards').innerHTML=apps.map((a,i)=>`
+    <div class="exam-card">
+      <div class="exam-dot" style="background:${colors[a.status]}"></div>
+      <div class="exam-info">
+        <div class="exam-name">${a.name}</div>
+        <div class="exam-body">${a.body}${a.deadline?' · Deadline: '+fmt(a.deadline):''}${a.appno?' · App No: '+a.appno:''}</div>
+      </div>
+      ${a.fees?`<span style="font-family:var(--mono);font-size:12px;color:var(--green)">₹${a.fees}</span>`:''}
+      <select onchange="updateAppStatus(${i},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:${colors[a.status]};padding:5px 10px;border-radius:8px;font-size:11px;font-family:var(--mono)">
+        <option ${a.status==='Not applied'?'selected':''}>Not applied</option>
+        <option ${a.status==='Applied'?'selected':''}>Applied</option>
+        <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="deleteApp(${i})">✕</button>
+    </div>`).join('');
+}
+
+function updateAppStatus(i,val) {
+  const apps=DB.get('applications'); apps[i].status=val; DB.set('applications',apps); renderApps();
+}
+
+function saveApp() {
+  const a={name:document.getElementById('app-name').value,body:document.getElementById('app-body').value,
+    deadline:document.getElementById('app-deadline').value,appno:document.getElementById('app-appno').value,
+    fees:document.getElementById('app-fees').value,status:document.getElementById('app-status').value};
+  if(!a.name){toast('Enter exam name!','error');return;}
+  const apps=DB.get('applications'); apps.push(a); DB.set('applications',apps);
+  closeModal('modal-app'); toast('Exam added! ✓'); renderApps();
+}
+
+function deleteApp(i){if(!confirm('Delete?'))return;const apps=DB.get('applications');del(apps,i);DB.set('applications',apps);renderApps();}
+
+// ── FEES ─────────────────────────────────────────
+function renderFees() {
+  const fees=DB.get('fees');
+  const total=fees.reduce((a,b)=>a+(+b.amount||0),0);
+  const examFee=fees.filter(f=>f.cat==='Exam Fee').reduce((a,b)=>a+(+b.amount||0),0);
+  const books=fees.filter(f=>f.cat==='Books').reduce((a,b)=>a+(+b.amount||0),0);
+  const travel=fees.filter(f=>f.cat==='Travel').reduce((a,b)=>a+(+b.amount||0),0);
+  document.getElementById('fee-total').textContent='₹'+total.toLocaleString('en-IN');
+  document.getElementById('fee-exam').textContent='₹'+examFee.toLocaleString('en-IN');
+  document.getElementById('fee-books').textContent='₹'+books.toLocaleString('en-IN');
+  document.getElementById('fee-travel').textContent='₹'+travel.toLocaleString('en-IN');
+  document.getElementById('fees-table').innerHTML=fees.slice().reverse().map((f,i)=>`
+    <tr>
+      <td><span style="font-family:var(--mono);font-size:11px">${fmt(f.date)}</span></td>
+      <td>${f.item}</td>
+      <td><span class="badge badge-purple">${f.cat}</span></td>
+      <td style="color:var(--green);font-family:var(--mono)">₹${(+f.amount).toLocaleString('en-IN')}</td>
+      <td style="font-size:12px">${f.mode}</td>
+      <td style="font-size:12px;color:var(--text3)">${f.ref||'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteFee(${fees.length-1-i})">✕</button></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No expenses yet</td></tr>';
+  document.getElementById('fee-date').value=today();
+}
+
+function saveFee() {
+  const item=document.getElementById('fee-item').value;
+  const amount=document.getElementById('fee-amount').value;
+  if(!item||!amount){toast('Fill Item and Amount!','error');return;}
+  const fees=DB.get('fees');
+  fees.push({date:document.getElementById('fee-date').value,item,cat:document.getElementById('fee-cat').value,
+    amount:+amount,mode:document.getElementById('fee-mode').value,ref:document.getElementById('fee-ref').value});
+  DB.set('fees',fees);
+  ['fee-item','fee-amount','fee-ref'].forEach(id=>document.getElementById(id).value='');
+  toast('Expense saved! ✓'); renderFees();
+}
+
+function deleteFee(i){if(!confirm('Delete?'))return;const fees=DB.get('fees');del(fees,i);DB.set('fees',fees);renderFees();}
+
+// ── HALL TICKETS ─────────────────────────────────
+function renderHT() {
+  const hts=DB.get('halltix');
+  document.getElementById('ht-cards').innerHTML=hts.length?hts.map((h,i)=>`
+    <div class="exam-card">
+      <div class="exam-dot" style="background:${h.dl==='Yes'?'var(--green)':'var(--amber)'}"></div>
+      <div class="exam-info">
+        <div class="exam-name">${h.name}</div>
+        <div class="exam-body">${h.date?'📅 '+fmt(h.date):'Date TBA'}${h.time?' · ⏰ '+h.time:''}${h.centre?' · '+h.centre:''}</div>
+        ${h.no?`<div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)">HT No: ${h.no}</div>`:''}
+      </div>
+      <span class="badge ${h.dl==='Yes'?'badge-green':'badge-amber'}">${h.dl==='Yes'?'Downloaded':'Pending'}</span>
+      <span class="badge ${h.travel==='Yes'?'badge-green':'badge-amber'}" style="margin-left:4px">${h.travel==='Yes'?'Travel ✓':'Travel ?'}</span>
+      <button class="btn btn-ghost btn-sm" onclick="deleteHT(${i})">✕</button>
+    </div>`).join('')
+    : '<p style="color:var(--text3);font-size:13px">No exam dates added yet</p>';
+}
+
+function saveHT() {
+  const h={name:document.getElementById('ht-name').value,date:document.getElementById('ht-date').value,
+    time:document.getElementById('ht-time').value,no:document.getElementById('ht-no').value,
+    centre:document.getElementById('ht-centre').value,dl:document.getElementById('ht-dl').value,
+    travel:document.getElementById('ht-travel').value};
+  if(!h.name){toast('Enter exam name!','error');return;}
+  const hts=DB.get('halltix'); hts.push(h); DB.set('halltix',hts);
+  closeModal('modal-ht'); toast('Exam date saved! ✓'); renderHT();
+}
+
+function deleteHT(i){if(!confirm('Delete?'))return;const hts=DB.get('halltix');del(hts,i);DB.set('halltix',hts);renderHT();}
+
+// ── RESULTS ──────────────────────────────────────
+function renderResults() {
+  const results=DB.get('results');
+  const statusColor={'Pending':'var(--amber)','Cleared':'var(--green)','Not cleared':'var(--red)','Waiting':'var(--blue)'};
+  const statusBadge={'Pending':'badge-amber','Cleared':'badge-green','Not cleared':'badge-red','Waiting':'badge-blue'};
+  document.getElementById('results-cards').innerHTML=results.length?results.map((r,i)=>`
+    <div class="exam-card">
+      <div class="exam-dot" style="background:${statusColor[r.status]||'var(--text3)'}"></div>
+      <div class="exam-info">
+        <div class="exam-name">${r.name}</div>
+        <div class="exam-body">${r.date?fmt(r.date):''}${r.att==='Yes'?' · Attended':" · Not attended"}${r.score?' · Score: '+r.score:''}</div>
+        ${r.remarks?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${r.remarks}</div>`:''}
+      </div>
+      <span class="badge ${statusBadge[r.status]||'badge-amber'}">${r.status}</span>
+      <button class="btn btn-ghost btn-sm" onclick="deleteResult(${i})">✕</button>
+    </div>`).join('')
+    : '<p style="color:var(--text3);font-size:13px">No results logged yet</p>';
+}
+
+function saveResult() {
+  const r={name:document.getElementById('res-name').value,date:document.getElementById('res-date').value,
+    att:document.getElementById('res-att').value,total:document.getElementById('res-total').value,
+    attempted:document.getElementById('res-att2').value,correct:document.getElementById('res-correct').value,
+    score:document.getElementById('res-score').value,status:document.getElementById('res-status').value,
+    remarks:document.getElementById('res-remarks').value};
+  if(!r.name){toast('Enter exam name!','error');return;}
+  const results=DB.get('results'); results.push(r); DB.set('results',results);
+  closeModal('modal-result'); toast('Result saved! ✓'); renderResults();
+}
+
+function deleteResult(i){if(!confirm('Delete?'))return;const results=DB.get('results');del(results,i);DB.set('results',results);renderResults();}
+
+// ── POMODORO ─────────────────────────────────────
+const POMO_MODES = {
+  focus: {label:'Focus',time:50*60,color:'var(--accent)'},
+  short: {label:'Break',time:10*60,color:'var(--green)'},
+  long:  {label:'Long Break',time:30*60,color:'var(--amber)'},
+};
+let pomoMode='focus', pomoLeft=50*60, pomoTotal=50*60;
+let pomoRunning=false, pomoInterval=null;
+let pomoSession=0, pomoFocusMins=0;
+let pomoLog=[];
+
+const CIRCUM=2*Math.PI*68;
+
+function setMode(m){
+  if(pomoRunning) return;
+  pomoMode=m;
+  pomoLeft=POMO_MODES[m].time;
+  pomoTotal=POMO_MODES[m].time;
+  document.querySelectorAll('.pomo-mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+m).classList.add('active');
+  updatePomoDisplay();
+}
+
+function toggleTimer(){
+  if(pomoRunning){ pauseTimer(); return; }
+  pomoRunning=true;
+  document.getElementById('pomo-start-btn').textContent='⏸';
+  pomoInterval=setInterval(()=>{
+    pomoLeft--;
+    if(pomoLeft<=0){ timerDone(); return; }
+    updatePomoDisplay();
+  },1000);
+}
+
+function pauseTimer(){
+  pomoRunning=false;
+  clearInterval(pomoInterval);
+  document.getElementById('pomo-start-btn').textContent='▶';
+}
+
+function resetTimer(){
+  pauseTimer();
+  pomoLeft=pomoTotal=POMO_MODES[pomoMode].time;
+  updatePomoDisplay();
+}
+
+function skipTimer(){ timerDone(); }
+
+function timerDone(){
+  pauseTimer();
+  if(pomoMode==='focus'){
+    pomoSession++;
+    pomoFocusMins+=50;
+    const now=new Date();
+    pomoLog.push({time:now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),mins:50});
+    if(pomoSession%4===0) setMode('long');
+    else setMode('short');
+    updateSessionLog();
+    // browser notification
+    if(Notification.permission==='granted'){
+      new Notification('Break time! 🟢',{body:'50 min done. Stand up, stretch, water.'});
+    }
+    toast('Session done! Take a break 🟢');
+  } else {
+    setMode('focus');
+    toast('Break over! Back to focus 🔴');
+  }
+  updatePomoDisplay();
+  // update dots
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('dot-'+i);
+    if(d) d.classList.toggle('done', i<(pomoSession%4||4));
+  }
+  document.getElementById('pomo-count').textContent=pomoSession;
+  document.getElementById('pomo-focustime').textContent=pomoFocusMins+'m';
+  document.getElementById('pomo-streak').textContent=pomoSession+'🔥';
+  document.getElementById('pomo-subject-label').textContent=`Session ${(pomoSession%4)||4} of 4`;
+}
+
+function updatePomoDisplay(){
+  const m=Math.floor(pomoLeft/60).toString().padStart(2,'0');
+  const s=(pomoLeft%60).toString().padStart(2,'0');
+  document.getElementById('pomo-display').textContent=`${m}:${s}`;
+  document.getElementById('pomo-label').textContent=POMO_MODES[pomoMode].label;
+  const prog=document.getElementById('pomo-prog');
+  const offset=CIRCUM*(1-pomoLeft/POMO_MODES[pomoMode].time);
+  prog.style.strokeDashoffset=offset;
+  prog.style.stroke=POMO_MODES[pomoMode].color;
+  // tab title
+  if(pomoRunning) document.title=`${m}:${s} — VETRIPREP 2026`;
+  else document.title='VETRIPREP 2026';
+}
+
+function updateSessionLog(){
+  const el=document.getElementById('pomo-session-log');
+  if(!el) return;
+  if(!pomoLog.length){ el.textContent='No sessions yet today.'; return; }
+  el.innerHTML=pomoLog.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">${s.time}</span>
+      <span class="badge badge-purple">Session ${i+1}</span>
+      <span style="font-size:12px;color:var(--text2)">${s.mins} min focus</span>
+    </div>`).join('');
+}
+
+function renderTimerPage(){
+  updatePomoDisplay();
+  updateSessionLog();
+  // show current block
+  const now=new Date();
+  const h=now.getHours(), mn=now.getMinutes();
+  const cur=BLOCKS.find(b=>{
+    if(!b.t||b.brk) return false;
+    const [start]=b.t.split('–');
+    const [sh,sm]=start.trim().replace(' AM','').replace(' PM','').split(':').map(Number);
+    const sh24=(start.includes('PM')&&sh!==12)?sh+12:sh;
+    return h===sh24 && mn<=59;
+  });
+  const el=document.getElementById('timer-block-list');
+  if(el){
+    if(cur) el.innerHTML=`<div class="block-item"><span class="block-num">${cur.n}</span><span class="block-time">${cur.t}</span><span class="block-subj">${cur.s}</span><span class="block-mcq">${cur.m}</span></div>`;
+    else el.innerHTML=`<p style="color:var(--text3);font-size:13px">Check your timetable for current block</p>`;
+  }
+  // request notification permission
+  if(Notification && Notification.permission==='default') Notification.requestPermission();
+}
+
+// ── NAVIGATION (override with timer) ─────────────
+const _origNav = window.nav;
+window.nav = function(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if(id==='dashboard') renderDashboard();
+  if(id==='timer') renderTimerPage();
+  if(id==='log') renderLog();
+  if(id==='errors') renderErrors();
+  if(id==='subjects') renderSubjects();
+  if(id==='weekly') renderWeekly();
+  if(id==='applications') renderApps();
+  if(id==='fees') renderFees();
+  if(id==='halltix') renderHT();
+  if(id==='results') renderResults();
+  if(id==='travel') renderTravel();
+  if(id==='bagpack') renderBag();
+  if(id==='certificates') renderCerts();
+  if(id==='goals') renderGoals();
+  if(id==='health') renderHealth();
+  if(id==='export') renderExport();
+}
+
+
+// ── TRAVEL PLANNER ───────────────────────────────
+function saveTravel(){
+  const exam=document.getElementById('tv-exam').value;
+  if(!exam){toast('Enter exam name!','error');return;}
+  const t={
+    exam, date:document.getElementById('tv-date').value,
+    city:document.getElementById('tv-city').value,
+    report:document.getElementById('tv-report').value,
+    mode:document.getElementById('tv-mode').value,
+    depart:document.getElementById('tv-depart').value,
+    cost:document.getElementById('tv-cost').value||0,
+    stay:document.getElementById('tv-stay').value,
+    hotel:document.getElementById('tv-hotel').value,
+    contact:document.getElementById('tv-contact').value,
+    notes:document.getElementById('tv-notes').value,
+    status:'Planned'
+  };
+  const travels=DB.get('travels'); travels.push(t); DB.set('travels',travels);
+  ['tv-exam','tv-city','tv-report','tv-depart','tv-cost','tv-hotel','tv-contact','tv-notes'].forEach(id=>document.getElementById(id).value='');
+  toast('Travel plan saved! 🚌'); renderTravel();
+}
+
+function renderTravel(){
+  const travels=DB.get('travels');
+  const total=travels.reduce((a,b)=>a+(+b.cost||0),0);
+  const el=document.getElementById('tv-total');
+  if(el) el.textContent='₹'+total.toLocaleString('en-IN');
+  const tb=document.getElementById('travel-table');
+  if(!tb) return;
+  tb.innerHTML=travels.slice().reverse().map((t,i)=>`
+    <tr>
+      <td style="font-weight:600">${t.exam}</td>
+      <td style="font-family:var(--mono);font-size:11px">${fmt(t.date)}</td>
+      <td>${t.city||'—'}</td>
+      <td><span class="badge badge-purple">${t.mode}</span></td>
+      <td style="font-family:var(--mono);font-size:12px">${t.depart||'—'}</td>
+      <td style="color:var(--accent);font-family:var(--mono)">₹${(+t.cost).toLocaleString('en-IN')}</td>
+      <td style="font-size:12px">${t.stay.includes('No')?'Same day':'Stay'}</td>
+      <td><span class="badge badge-amber">${t.status}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteTravel(${travels.length-1-i})">✕</button></td>
+    </tr>`).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px">No travel plans yet</td></tr>';
+}
+
+function deleteTravel(i){if(!confirm('Delete?'))return;const t=DB.get('travels');t.splice(i,1);DB.set('travels',t);renderTravel();}
+
+// ── BAG CHECKLIST ────────────────────────────────
+const BAG_DEFAULTS = {
+  docs:[
+    'Hall ticket / Admit card (2 printed copies)',
+    'Original Aadhar card',
+    'Aadhar photocopy (3 copies)',
+    'Passport size photos (6 copies)',
+    'Birth certificate',
+    'Community certificate (OBC/SC/ST)',
+    'Disability certificate (if applicable)',
+    'PwD certificate (if applicable)',
+  ],
+  stationary:[
+    'Blue ballpoint pen (2 nos)',
+    'Black pen (backup)',
+    'HB pencil',
+    'Eraser',
+    'Sharpener',
+    'Small ruler',
+    'Watch (simple, no smart watch)',
+  ],
+  health:[
+    'Pain relief tablet (Combiflam / Ibuprofen)',
+    'Fibromyalgia medication',
+    'Small hot/cold pack',
+    'Water bottle (750ml)',
+    'Light snack (banana / biscuits)',
+    'Glucose / ORS sachet',
+    'Face mask (spare)',
+    'Sanitizer',
+    'Neck support pillow (travel size)',
+  ],
+  others:[
+    'Phone (charged 100%)',
+    'Power bank (charged)',
+    'Earphones (for waiting)',
+    'Small torch / flashlight',
+    'Cash ₹500 minimum',
+    'UPI app ready on phone',
+    'Offline Google Maps downloaded',
+    'Hall ticket centre address saved',
+    'Emergency contact numbers saved',
+    'Plastic bag (for documents — rain protection)',
+  ],
+};
+
+function renderBag(){
+  const checked=DB.getObj('bag_checked',{});
+  const cats={docs:'bag-docs',stationary:'bag-stationary',health:'bag-health',others:'bag-others'};
+  let total=0,done=0;
+  Object.entries(cats).forEach(([cat,elId])=>{
+    const el=document.getElementById(elId);
+    if(!el) return;
+    const custom=DB.get('bag_custom_'+cat);
+    const allItems=[...BAG_DEFAULTS[cat],...custom];
+    total+=allItems.length;
+    done+=allItems.filter((_,i)=>checked[cat+'_'+i]).length;
+    el.innerHTML=allItems.map((item,i)=>{
+      const k=cat+'_'+i; const d=checked[k];
+      return `<div class="check-item" onclick="toggleBag('${cat}',${i})">
+        <div class="check-box ${d?'done':''}"></div>
+        <span class="check-label ${d?'done':''}">${item}</span>
+      </div>`;
+    }).join('');
+  });
+  const bc=document.getElementById('bag-count');
+  if(bc) bc.textContent=done+' / '+total;
+}
+
+function toggleBag(cat,i){
+  const checked=DB.getObj('bag_checked',{});
+  const k=cat+'_'+i;
+  checked[k]=!checked[k];
+  DB.setObj('bag_checked',checked);
+  renderBag();
+}
+
+function addBagItem(){
+  const item=document.getElementById('bag-custom-item').value.trim();
+  const cat=document.getElementById('bag-custom-cat').value.toLowerCase().replace('stationery','stationary').replace('health','health').replace('documents','docs').replace('others','others');
+  if(!item){toast('Enter item name!','error');return;}
+  const custom=DB.get('bag_custom_'+cat);
+  custom.push(item);
+  DB.set('bag_custom_'+cat,custom);
+  document.getElementById('bag-custom-item').value='';
+  toast('Item added! 🎒'); renderBag();
+}
+
+function resetBag(){
+  if(!confirm('Reset all bag checks?')) return;
+  DB.setObj('bag_checked',{});
+  renderBag();
+  toast('Bag reset ↺');
+}
+
+// ── CERTIFICATES ─────────────────────────────────
+const CERT_DEFAULTS = {
+  essential:[
+    'Hall ticket (original printout)',
+    'Appointment order / call letter',
+    'Medical fitness certificate',
+    'Pharmacy Council registration certificate',
+    'D.Pharmacy marksheet — Year 1',
+    'D.Pharmacy marksheet — Year 2',
+    'D.Pharmacy consolidated marksheet',
+  ],
+  education:[
+    '10th standard marksheet (original)',
+    '10th standard certificate (original)',
+    '12th standard / HSC marksheet',
+    '12th standard / HSC certificate',
+    'D.Pharmacy provisional certificate',
+    'D.Pharmacy degree certificate',
+    'BBA degree certificate',
+    'BBA consolidated marksheet',
+    'Transfer certificate (TC)',
+    'Conduct certificate',
+  ],
+  identity:[
+    'Aadhar card (original)',
+    'Voter ID (original)',
+    'PAN card',
+    'Passport (if available)',
+    'Community certificate (OBC/BC/SC/ST)',
+    'Income certificate (family)',
+    'Nativity / Residence certificate',
+    'Caste certificate (if applicable)',
+    'Differently abled certificate (if applicable)',
+  ],
+  experience:[
+    'MedPlus experience certificate (3 years)',
+    'MedPlus salary slip (last 3 months)',
+    'Character certificate from employer',
+    'No objection certificate (if currently employed)',
+    'Any internship certificate',
+    'Gazette notification (name change if any)',
+    'Passport size photos — 10 copies',
+    'Self-attested copies of all above — 3 sets each',
+  ],
+};
+
+function renderCerts(){
+  const status=DB.getObj('cert_status',{});
+  const cats={essential:'cert-essential',education:'cert-education',identity:'cert-identity',experience:'cert-experience'};
+  Object.entries(cats).forEach(([cat,elId])=>{
+    const el=document.getElementById(elId);
+    if(!el) return;
+    el.innerHTML=CERT_DEFAULTS[cat].map((item,i)=>{
+      const k=cat+'_'+i; const s=status[k]||'Missing';
+      const colors={'Ready':'var(--green)','Photocopy only':'var(--amber)','Missing':'var(--red)','Not needed':'var(--text3)'};
+      const badges={'Ready':'badge-green','Photocopy only':'badge-amber','Missing':'badge-red','Not needed':''};
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;flex:1;color:var(--text)">${item}</span>
+        <select onchange="updateCert('${k}',this.value)" style="background:var(--bg3);border:1px solid var(--border);color:${colors[s]||'var(--text3)'};padding:3px 8px;border-radius:6px;font-size:10px;font-family:var(--mono)">
+          <option ${s==='Missing'?'selected':''}>Missing</option>
+          <option ${s==='Photocopy only'?'selected':''}>Photocopy only</option>
+          <option ${s==='Ready'?'selected':''}>Ready</option>
+          <option ${s==='Not needed'?'selected':''}>Not needed</option>
+        </select>
+      </div>`;
+    }).join('');
+  });
+}
+
+function updateCert(k,val){
+  const s=DB.getObj('cert_status',{}); s[k]=val; DB.setObj('cert_status',s); renderCerts();
+}
+
+// ── GOALS ────────────────────────────────────────
+function saveGoal(){
+  const text=document.getElementById('goal-text').value;
+  if(!text){toast('Enter goal!','error');return;}
+  const goals=DB.get('goals');
+  goals.push({text,cat:document.getElementById('goal-cat').value,date:document.getElementById('goal-date').value,priority:document.getElementById('goal-priority').value,status:'In Progress',created:today()});
+  DB.set('goals',goals);
+  document.getElementById('goal-text').value='';
+  toast('Goal added! 🎯'); renderGoals();
+}
+
+function renderGoals(){
+  const goals=DB.get('goals');
+  const total=goals.length, done=goals.filter(g=>g.status==='Achieved').length, pending=goals.filter(g=>g.status==='In Progress').length;
+  const gt=document.getElementById('goal-total'); if(gt) gt.textContent=total;
+  const gd=document.getElementById('goal-done'); if(gd) gd.textContent=done;
+  const gp=document.getElementById('goal-pending'); if(gp) gp.textContent=pending;
+  const active=document.getElementById('goals-active');
+  if(active) active.innerHTML=goals.filter(g=>g.status==='In Progress').slice(0,5).map((g,i)=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--text);font-weight:500">${g.text}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)">${g.cat} · ${g.priority} priority${g.date?' · '+fmt(g.date):''}</div>
+      </div>
+      <button onclick="markGoalDone(${goals.indexOf(g)})" class="btn btn-ghost btn-sm" style="color:var(--green)">✓</button>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:13px;padding:8px 0">No active goals</p>';
+  const all=document.getElementById('goals-all');
+  if(all) all.innerHTML=goals.slice().reverse().map((g,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:13px;color:${g.status==='Achieved'?'var(--text3)':'var(--text)'};${g.status==='Achieved'?'text-decoration:line-through':''}">${g.text}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)">${g.cat} · ${g.priority}</div>
+      </div>
+      <span class="badge ${g.status==='Achieved'?'badge-green':'badge-amber'}">${g.status}</span>
+      <button class="btn btn-ghost btn-sm" onclick="deleteGoal(${goals.length-1-i})">✕</button>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:13px;padding:8px 0">No goals yet</p>';
+}
+
+function markGoalDone(i){const goals=DB.get('goals');goals[i].status='Achieved';DB.set('goals',goals);toast('Goal achieved! 🎉');renderGoals();}
+function deleteGoal(i){if(!confirm('Delete?'))return;const goals=DB.get('goals');goals.splice(i,1);DB.set('goals',goals);renderGoals();}
+
+// ── HEALTH LOG ───────────────────────────────────
+function saveHealth(){
+  const pain=document.getElementById('h-pain').value;
+  if(!pain){toast('Enter pain level!','error');return;}
+  const logs=DB.get('healthlogs');
+  logs.push({
+    date:document.getElementById('h-date').value,
+    pain:+pain,
+    neck:+document.getElementById('h-neck').value||0,
+    sleep:+document.getElementById('h-sleep').value||0,
+    stretch:document.getElementById('h-stretch').value,
+    mood:document.getElementById('h-mood').value,
+    meds:document.getElementById('h-meds').value,
+    notes:document.getElementById('h-notes').value,
+  });
+  DB.set('healthlogs',logs);
+  ['h-pain','h-neck','h-sleep','h-meds','h-notes'].forEach(id=>document.getElementById(id).value='');
+  toast('Health logged! 💊'); renderHealth();
+}
+
+function renderHealth(){
+  const logs=DB.get('healthlogs');
+  const week=logs.filter(l=>{const d=new Date(l.date);const w=new Date();w.setDate(w.getDate()-7);return d>=w;});
+  const pains=week.filter(l=>l.pain>0).map(l=>l.pain);
+  const avg=pains.length?(pains.reduce((a,b)=>a+b,0)/pains.length).toFixed(1):'—';
+  const good=week.filter(l=>l.pain<=4).length;
+  const bad=week.filter(l=>l.pain>=7).length;
+  const stretch=week.filter(l=>l.stretch==='Yes').length;
+  const ap=document.getElementById('h-avg-pain'); if(ap) ap.textContent=avg;
+  const gd=document.getElementById('h-good-days'); if(gd) gd.textContent=good;
+  const bd=document.getElementById('h-bad-days'); if(bd) bd.textContent=bad;
+  const sd=document.getElementById('h-stretch-days'); if(sd) sd.textContent=stretch;
+  const hr=document.getElementById('health-recent');
+  if(hr) hr.innerHTML=logs.slice().reverse().slice(0,5).map(l=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3);min-width:80px">${fmt(l.date)}</span>
+      <span class="badge ${l.pain<=4?'badge-green':l.pain<=6?'badge-amber':'badge-red'}">Pain: ${l.pain}</span>
+      <span style="font-size:12px;color:var(--text2)">${l.mood||''}</span>
+      ${l.stretch==='Yes'?'<span style="font-size:11px;color:var(--green)">stretch ✓</span>':''}
+    </div>`).join('')||'<p style="color:var(--text3);font-size:13px;padding:8px 0">No health logs yet</p>';
+  const hd=document.getElementById('h-date'); if(hd) hd.value=today();
+}
+
+
+
+// ── EXPORT PAGE ──────────────────────────────────
+function renderExport(){
+  const logs=DB.get('logs'), errors=DB.get('errors'), fees=DB.get('fees');
+  const el=document.getElementById('ex-logs'); if(el) el.textContent=logs.length;
+  const ee=document.getElementById('ex-errors'); if(ee) ee.textContent=errors.length;
+  const ef=document.getElementById('ex-fees'); if(ef) ef.textContent=fees.length;
+  const allData=JSON.stringify({logs,errors,fees,travels:DB.get('travels'),goals:DB.get('goals'),healthlogs:DB.get('healthlogs'),weekly:DB.get('weekly')});
+  const es=document.getElementById('ex-size'); if(es) es.textContent=Math.round(allData.length/1024)+'kb';
+}
+
+// ── CSV DOWNLOAD ──────────────────────────────────
+function downloadCSV(type){
+  let rows=[], filename='', headers=[];
+  if(type==='logs'){
+    headers=['Date','Study Hours','MCQs Solved','Subjects Covered','Pain Level','Blocks Completed','Completed','Notes'];
+    rows=DB.get('logs').map(l=>[l.date,l.hours,l.mcqs,(l.subjects||[]).join(' | '),l.pain,l.blocks,l.completed,l.notes||'']);
+    filename='VETRIPREP_Daily_Log';
+  } else if(type==='errors'){
+    headers=['Date','Question','Correct Answer','Mistake Type','Subject','Reviewed'];
+    rows=DB.get('errors').map(e=>[e.date,e.question,e.answer,e.type,e.subject,e.reviewed]);
+    filename='VETRIPREP_Error_Log';
+  } else if(type==='fees'){
+    headers=['Date','Item','Category','Amount (Rs)','Payment Mode','Reference No'];
+    rows=DB.get('fees').map(f=>[f.date,f.item,f.cat,f.amount,f.mode,f.ref||'']);
+    filename='VETRIPREP_Fees';
+  } else if(type==='travels'){
+    headers=['Exam','Date','City','Mode','Depart Time','Cost (Rs)','Stay','Hotel','Contact','Notes'];
+    rows=DB.get('travels').map(t=>[t.exam,t.date,t.city,t.mode,t.depart,t.cost,t.stay,t.hotel||'',t.contact||'',t.notes||'']);
+    filename='VETRIPREP_Travel';
+  } else if(type==='goals'){
+    headers=['Goal','Category','Priority','Target Date','Status','Created'];
+    rows=DB.get('goals').map(g=>[g.text,g.cat,g.priority,g.date,g.status,g.created]);
+    filename='VETRIPREP_Goals';
+  } else if(type==='health'){
+    headers=['Date','Pain Level','Neck Pain','Sleep Hours','Stretch Done','Mood','Medication','Notes'];
+    rows=DB.get('healthlogs').map(h=>[h.date,h.pain,h.neck,h.sleep,h.stretch,h.mood,h.meds||'',h.notes||'']);
+    filename='VETRIPREP_Health_Log';
+  }
+
+  if(!rows.length){ toast('No data to export yet!','error'); return; }
+
+  const escape=v=>{
+    const s=String(v||'');
+    return s.includes(',')||s.includes('"')||s.includes('\n') ? '"'+s.replace(/"/g,'""')+'"' : s;
+  };
+  const csv=[headers.map(escape).join(','), ...rows.map(r=>r.map(escape).join(','))].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename+'_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast(filename+' downloaded! ✓');
+}
+
+function downloadAllCSV(){
+  const types=['logs','errors','fees','travels','goals','health'];
+  let i=0;
+  const next=()=>{ if(i<types.length){ downloadCSV(types[i++]); setTimeout(next,600); }};
+  next();
+  toast('Downloading all CSVs... 📊');
+}
+
+// ── PDF DOWNLOAD ──────────────────────────────────
+function downloadPDF(type){
+  const now=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  let title='', sections=[];
+
+  if(type==='daily'||type==='full'){
+    const logs=DB.get('logs');
+    const logRows=logs.length?logs.map(l=>`
+      <tr>
+        <td>${l.date||'—'}</td><td>${l.hours||0}h</td><td>${l.mcqs||0}</td>
+        <td>${(l.subjects||[]).join(', ')||'—'}</td><td>${l.pain||'—'}</td>
+        <td>${l.blocks||'—'}/13</td>
+        <td style="color:${l.completed==='Yes'?'#1a7a4a':'#b03040'}">${l.completed||'—'}</td>
+        <td>${l.notes||'—'}</td>
+      </tr>`).join('')
+      : '<tr><td colspan="8" style="text-align:center;color:#999">No entries yet</td></tr>';
+    sections.push({
+      title:'📅 Daily Study Log',
+      color:'#1a3a5a',
+      content:`<table><thead><tr><th>Date</th><th>Hours</th><th>MCQs</th><th>Subjects</th><th>Pain</th><th>Blocks</th><th>Done</th><th>Notes</th></tr></thead><tbody>${logRows}</tbody></table>`
+    });
+  }
+
+  if(type==='errors'||type==='full'){
+    const errors=DB.get('errors');
+    const errRows=errors.length?errors.map(e=>`
+      <tr>
+        <td>${e.date||'—'}</td><td>${e.question||'—'}</td><td>${e.answer||'—'}</td>
+        <td><span style="padding:2px 8px;border-radius:4px;font-size:11px;background:${e.type==='Concept'?'#3a1010':e.type==='Memory'?'#2a1d04':'#0d1e30'};color:${e.type==='Concept'?'#e06070':e.type==='Memory'?'#d4980a':'#7ab0e0'}">${e.type||'—'}</span></td>
+        <td>${e.subject||'—'}</td>
+        <td style="color:${e.reviewed==='Yes'?'#1a7a4a':'#b03040'}">${e.reviewed||'—'}</td>
+      </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#999">No errors logged yet</td></tr>';
+    sections.push({
+      title:'❌ Error Log',
+      color:'#3a1010',
+      content:`<table><thead><tr><th>Date</th><th>Question</th><th>Correct Answer</th><th>Type</th><th>Subject</th><th>Reviewed</th></tr></thead><tbody>${errRows}</tbody></table>`
+    });
+  }
+
+  if(type==='fees'||type==='full'){
+    const fees=DB.get('fees');
+    const total=fees.reduce((a,b)=>a+(+b.amount||0),0);
+    const feeRows=fees.length?fees.map(f=>`
+      <tr>
+        <td>${f.date||'—'}</td><td>${f.item||'—'}</td><td>${f.cat||'—'}</td>
+        <td style="color:#1a7a4a;font-weight:600">₹${(+f.amount||0).toLocaleString('en-IN')}</td>
+        <td>${f.mode||'—'}</td><td>${f.ref||'—'}</td>
+      </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#999">No expenses yet</td></tr>';
+    sections.push({
+      title:'💰 Fees & Expenses',
+      color:'#0a2818',
+      content:`<table><thead><tr><th>Date</th><th>Item</th><th>Category</th><th>Amount</th><th>Mode</th><th>Receipt</th></tr></thead><tbody>${feeRows}</tbody></table>
+      <div style="text-align:right;margin-top:12px;font-size:16px;font-weight:700;color:#1a7a4a">Total: ₹${total.toLocaleString('en-IN')}</div>`
+    });
+  }
+
+  if(type==='full'){
+    const goals=DB.get('goals');
+    if(goals.length){
+      const goalRows=goals.map(g=>`<tr><td>${g.text}</td><td>${g.cat}</td><td>${g.priority}</td><td>${g.date||'—'}</td><td style="color:${g.status==='Achieved'?'#1a7a4a':'#b07010'}">${g.status}</td></tr>`).join('');
+      sections.push({title:'🎯 Goals',color:'#1a1530',content:`<table><thead><tr><th>Goal</th><th>Category</th><th>Priority</th><th>Target Date</th><th>Status</th></tr></thead><tbody>${goalRows}</tbody></table>`});
+    }
+    const health=DB.get('healthlogs');
+    if(health.length){
+      const hRows=health.map(h=>`<tr><td>${h.date}</td><td>${h.pain}/10</td><td>${h.neck||'—'}/10</td><td>${h.sleep||'—'}h</td><td>${h.stretch}</td><td>${h.mood||'—'}</td></tr>`).join('');
+      sections.push({title:'💊 Health Log',color:'#1a0e14',content:`<table><thead><tr><th>Date</th><th>Pain</th><th>Neck</th><th>Sleep</th><th>Stretch</th><th>Mood</th></tr></thead><tbody>${hRows}</tbody></table>`});
+    }
+  }
+
+  if(!sections.length){ toast('No data to export yet!','error'); return; }
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>VETRIPREP Report — ${now}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a1a;padding:32px;font-size:13px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:3px solid #c49a6c}
+    .logo-shield{width:48px;height:56px}
+    .hd-title{font-size:26px;font-weight:800;color:#1a1a1a;letter-spacing:-0.5px}
+    .hd-sub{font-size:12px;color:#888;margin-top:4px;font-family:monospace;letter-spacing:1px}
+    .hd-date{margin-left:auto;font-size:11px;color:#aaa;font-family:monospace;text-align:right}
+    .section{margin-bottom:28px}
+    .section-title{font-size:16px;font-weight:700;color:#fff;padding:10px 16px;border-radius:8px 8px 0 0;margin-bottom:0}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{background:#f5f3f0;padding:8px 10px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:#555;border-bottom:2px solid #e0d8d0}
+    td{padding:8px 10px;border-bottom:1px solid #f0ede8;vertical-align:top}
+    tr:nth-child(even) td{background:#faf9f7}
+    .footer{margin-top:32px;padding-top:14px;border-top:1px solid #e0d8d0;font-size:10px;color:#aaa;font-family:monospace;display:flex;justify-content:space-between}
+    @media print{body{padding:16px}.section{page-break-inside:avoid}}
+  </style>
+  </head><body>
+  <div class="header">
+    <svg class="logo-shield" viewBox="0 0 42 54" fill="none">
+      <path d="M21 2 L39 9 L39 30 Q39 46 21 52 Q3 46 3 30 L3 9 Z" fill="#1a1520" stroke="#c49a6c" stroke-width="1.5"/>
+      <path d="M21 8 L34 13 L34 29 Q34 41 21 46 Q8 41 8 29 L8 13 Z" fill="none" stroke="#c49a6c" stroke-width="0.5" opacity="0.4"/>
+      <path d="M12 16 L21 32 L30 16" fill="none" stroke="#c49a6c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="21" cy="2" r="2.5" fill="#c49a6c"/>
+    </svg>
+    <div>
+      <div class="hd-title">VETRIPREP</div>
+      <div class="hd-sub">வெற்றி · VICTORY · MRB · RRB · TNPSC · NIT</div>
+    </div>
+    <div class="hd-date">Generated on<br><strong>${now}</strong></div>
+  </div>
+  ${sections.map(s=>`
+    <div class="section">
+      <div class="section-title" style="background:${s.color}">${s.title}</div>
+      <div style="border:1px solid #e0d8d0;border-top:none;border-radius:0 0 8px 8px;padding:0;overflow:hidden">
+        ${s.content}
+      </div>
+    </div>`).join('')}
+  <div class="footer">
+    <span>VETRIPREP — Government Pharmacist Prep 2026</span>
+    <span>Printed: ${now}</span>
+  </div>
+  <script>window.onload=()=>{window.print()}<\/script>
+  </body></html>`;
+
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  toast('PDF report opened — use Ctrl+P to save as PDF ✓');
+}
+
+// ── BACKUP & RESTORE ──────────────────────────────
+function downloadBackup(){
+  const keys=['logs','errors','fees','travels','goals','healthlogs','weekly','applications','halltix','results','subj_progress','cert_status','bag_checked'];
+  const backup={version:'1.0',date:new Date().toISOString(),data:{}};
+  keys.forEach(k=>{
+    try{ backup.data[k]=DB.get(k); } catch(e){}
+  });
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='VETRIPREP_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Backup downloaded! Keep it safe. 💾');
+}
+
+function restoreBackup(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const backup=JSON.parse(ev.target.result);
+      if(!backup.data){ toast('Invalid backup file!','error'); return; }
+      if(!confirm('This will replace ALL current data. Continue?')) return;
+      Object.entries(backup.data).forEach(([k,v])=>DB.set(k,v));
+      toast('Backup restored! Refreshing... ✓');
+      setTimeout(()=>location.reload(),1200);
+    } catch(err){ toast('Failed to restore backup!','error'); }
+  };
+  reader.readAsText(file);
+}
+
+
+// ── QUOTES ───────────────────────────────────────
+const QUOTES = [
+  {q:"Consistency is what transforms average into excellence.", a:"— Unknown"},
+  {q:"The secret of getting ahead is getting started.", a:"— Mark Twain"},
+  {q:"Don't watch the clock. Do what it does — keep going.", a:"— Sam Levenson"},
+  {q:"Success is the sum of small efforts, repeated day in and day out.", a:"— Robert Collier"},
+  {q:"You don't have to be great to start, but you have to start to be great.", a:"— Zig Ziglar"},
+  {q:"Hard work beats talent when talent doesn't work hard.", a:"— Tim Notke"},
+  {q:"The pain you feel today will be the strength you feel tomorrow.", a:"— Unknown"},
+  {q:"Study not to pass the exam. Study to change your life.", a:"— VETRIPREP"},
+  {q:"One exam is all it takes. Stay consistent.", a:"— VETRIPREP"},
+  {q:"Discipline is choosing between what you want now and what you want most.", a:"— Abraham Lincoln"},
+  {q:"வெற்றி பெறுவதற்கு முன்பு தோல்வியை சந்திக்க தயாராக இரு.", a:"— Tamil Wisdom"},
+  {q:"Every MCQ you solve today is one step closer to that government job.", a:"— VETRIPREP"},
+  {q:"Your future self is watching you right now through your memories.", a:"— Unknown"},
+  {q:"Small daily improvements are the key to staggering long-term results.", a:"— Unknown"},
+  {q:"The harder you work for something, the greater you'll feel when you achieve it.", a:"— Unknown"},
+];
+let quoteIdx = Math.floor(Math.random()*QUOTES.length);
+function showQuote(){
+  const q=QUOTES[quoteIdx];
+  const qt=document.getElementById('quote-text');
+  const qa=document.getElementById('quote-author');
+  if(qt) qt.textContent='"'+q.q+'"';
+  if(qa) qa.textContent=q.a;
+}
+function nextQuote(){
+  quoteIdx=(quoteIdx+1)%QUOTES.length;
+  showQuote();
+}
+
+// ── MOBILE NAV ───────────────────────────────────
+function mobNav(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mob-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  renderPage(id);
+  window.scrollTo(0,0);
+}
+
+function toggleMoreMenu(){
+  const m=document.getElementById('mob-more-menu');
+  m.classList.toggle('open');
+}
+
+// Close more menu on outside click
+document.addEventListener('click',e=>{
+  const menu=document.getElementById('mob-more-menu');
+  const moreBtn=document.getElementById('mob-more');
+  if(menu&&!menu.contains(e.target)&&!moreBtn.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
+
+// ── INIT ─────────────────────────────────────────
+window.addEventListener('click', e=>{
+  document.querySelectorAll('.modal-overlay').forEach(m=>{
+    if(e.target===m) m.classList.remove('open');
+  });
+});
+
+// Check if Firebase is configured
+const isConfigured = FIREBASE_CONFIG.apiKey !== "PASTE_YOUR_API_KEY_HERE";
+
+if(isConfigured){
+  initFirebase();
+} else {
+  // Show login overlay so user can skip
+  setTimeout(()=>{
+    document.getElementById('login-overlay').style.display='flex';
+  }, 500);
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
